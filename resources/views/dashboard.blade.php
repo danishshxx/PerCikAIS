@@ -31,11 +31,11 @@
             </div>
 
             <nav class="space-y-2 text-sm font-medium">
-                <a href="#" class="flex items-center gap-3 py-3 px-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 border border-blue-200 dark:border-blue-500/20">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 border border-blue-200 dark:border-blue-500/20">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     Dasbor
                 </a>
-                <a href="#" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121A2F] hover:text-gray-900 dark:hover:text-white transition-colors">
+                <a href="{{ route('attendance.index') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121A2F] hover:text-gray-900 dark:hover:text-white transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Jadwal & Absensi
                 </a>
@@ -105,6 +105,17 @@
             </div>
         </div>
 
+        @if(session('success'))
+            <div class="mb-4 p-4 text-sm text-green-800 rounded-2xl bg-green-50 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800/50" role="alert">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="mb-4 p-4 text-sm text-red-800 rounded-2xl bg-red-50 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800/50" role="alert">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="bg-white dark:bg-[#0A0F1C] border border-gray-200 dark:border-gray-800/60 rounded-3xl p-6 shadow-sm dark:shadow-xl transition-colors duration-300">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-lg font-bold">Jadwal & Absensi Hari Ini</h2>
@@ -126,9 +137,12 @@
                         </p>
                     </div>
                 </div>
-                <button class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors shadow-md dark:shadow-lg dark:shadow-blue-900/20">
-                    Isi Kehadiran
-                </button>
+                <form action="{{ route('attendance.store') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors shadow-md dark:shadow-lg dark:shadow-blue-900/20">
+                        Isi Kehadiran
+                    </button>
+                </form>
             </div>
         </div>
 
