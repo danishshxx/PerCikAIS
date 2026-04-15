@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Jadwal & Absensi - SIAKAD</title>
+    <title>Keuangan - SIAKAD</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -32,70 +32,87 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     Dasbor
                 </a>
-                <a href="{{ route('attendance.index') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 border border-blue-200 dark:border-blue-500/20">
+                <a href="{{ route('attendance.index') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121A2F]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Jadwal & Absensi
                 </a>
-                <a href="#" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121A2F] hover:text-gray-900 dark:hover:text-white transition-colors">
+                <a href="{{ route('finance.index') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 border border-blue-200 dark:border-blue-500/20">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                     Keuangan
                 </a>
             </nav>
         </div>
         <div class="p-6 border-t border-gray-200 dark:border-gray-800">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
-                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                </div>
-                <div>
-                    <p class="text-sm font-semibold">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Siswa Aktif</p>
-                </div>
-            </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="w-full text-xs font-semibold text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 py-2.5 rounded-lg transition-colors">
-                    Keluar Sistem
-                </button>
+                <button type="submit" class="w-full text-xs font-semibold text-red-500 bg-red-50 dark:bg-red-500/10 py-2.5 rounded-lg">Keluar Sistem</button>
             </form>
         </div>
     </aside>
 
     <main class="flex-1 p-8 overflow-y-auto">
+        
         <div class="mb-8">
-            <h1 class="text-2xl font-bold">Jadwal & Riwayat Absensi</h1>
-            <p class="text-sm text-gray-500">Pantau kehadiranmu secara real-time.</p>
+            <h1 class="text-2xl font-bold">Keuangan & Tagihan</h1>
+            <p class="text-sm text-gray-500">Kelola dan selesaikan administrasi akademikmu.</p>
         </div>
 
+        @if(session('success'))
+            <div class="mb-6 p-4 text-sm text-green-800 rounded-2xl bg-green-50 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800/50">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white dark:bg-[#0A0F1C] border border-gray-200 dark:border-gray-800 rounded-3xl p-6">
-                    <h2 class="font-bold mb-4">Jadwal Mingguan</h2>
-                    <div class="p-4 bg-gray-50 dark:bg-[#121A2F] rounded-2xl flex justify-between items-center">
-                        <div>
-                            <p class="font-bold text-blue-600">Integrasi Aplikasi Enterprise</p>
-                            <p class="text-xs text-gray-500">Senin, 08:00 - 10:30</p>
-                        </div>
-                        <form action="{{ route('attendance.store') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="bg-blue-600 text-white text-xs px-4 py-2 rounded-lg">Absen Sekarang</button>
-                        </form>
-                    </div>
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    <p class="text-sm text-blue-200 font-semibold mb-1 uppercase tracking-wider">Total Tunggakan</p>
+                    <h3 class="text-3xl font-bold mb-6">Rp {{ number_format($totalPending, 0, ',', '.') }}</h3>
+                    <p class="text-xs text-blue-200">Pastikan melunasi tagihan sebelum masa KRS dimulai.</p>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#0A0F1C] border border-gray-200 dark:border-gray-800 rounded-3xl p-6">
-                <h2 class="font-bold mb-4">Riwayat Terbaru</h2>
-                <div class="space-y-3">
-                    @forelse($history as $log)
-                    <div class="p-3 bg-gray-50 dark:bg-[#121A2F] rounded-xl border border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                        <span class="text-xs font-medium">{{ \Carbon\Carbon::parse($log->attendance_date)->format('d M Y') }}</span>
-                        <span class="text-[10px] font-bold uppercase text-green-500">Hadir</span>
+            <div class="lg:col-span-2 space-y-4">
+                <h2 class="text-lg font-semibold mb-4">Daftar Tagihan (Invoice)</h2>
+                
+                @forelse($invoices as $invoice)
+                    <div class="bg-white dark:bg-[#0A0F1C] border border-gray-200 dark:border-gray-800 rounded-3xl p-5 shadow-sm flex flex-col md:flex-row justify-between md:items-center gap-4 transition-colors">
+                        <div>
+                            <div class="flex items-center gap-3 mb-1">
+                                <p class="font-bold text-gray-900 dark:text-white">{{ $invoice->description }}</p>
+                                @if($invoice->status == 'paid')
+                                    <span class="text-[10px] font-bold px-2 py-1 bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400 rounded-md uppercase">Lunas</span>
+                                @else
+                                    <span class="text-[10px] font-bold px-2 py-1 bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-500 rounded-md uppercase">Pending</span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-gray-500 font-mono">{{ $invoice->order_id }}</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-6">
+                            <p class="font-bold text-lg text-gray-900 dark:text-white">Rp {{ number_format($invoice->amount, 0, ',', '.') }}</p>
+                            
+                            @if($invoice->status == 'pending')
+                                <form action="{{ route('finance.pay', $invoice->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" onclick="return confirm('Simulasi Payment Gateway: Apakah kamu yakin ingin membayar tagihan ini?')" class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-900/20 whitespace-nowrap">
+                                        Bayar Sekarang
+                                    </button>
+                                </form>
+                            @else
+                                <button class="text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Kuitansi
+                                </button>
+                            @endif
+                        </div>
                     </div>
-                    @empty
-                    <p class="text-xs text-gray-500 text-center">Belum ada data.</p>
-                    @endforelse
-                </div>
+                @empty
+                    <div class="bg-white dark:bg-[#0A0F1C] border border-gray-200 dark:border-gray-800 rounded-3xl p-8 text-center">
+                        <p class="text-gray-500">Tidak ada tagihan saat ini.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </main>
