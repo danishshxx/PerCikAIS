@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Invoice;
-use Illuminate\Support\Facades\Hash; // NAH INI OBATNYA BANG 👇
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,8 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Bikin akun dummy
         $user = User::create([
-            'name' => 'Dummy Siswa',
-            'email' => 'murid@sekolah.com',
+            'name' => 'Danish Abrisam', // Nama lu bebas
+            'email' => 'dnshconquer@gmail.com', //
             'password' => Hash::make('password123'),
         ]);
 

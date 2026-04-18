@@ -37,9 +37,9 @@
                 </a>
                 <a href="{{ route('attendance.index') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121A2F] hover:text-gray-900 dark:hover:text-white transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Jadwal & Absensi
+                    Rekap Kehadiran
                 </a>
-                <a href="#" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121A2F] hover:text-gray-900 dark:hover:text-white transition-colors">
+                <a href="{{ route('finance.index') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121A2F] hover:text-gray-900 dark:hover:text-white transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                     Keuangan
                 </a>
@@ -72,7 +72,7 @@
             
             <div class="relative z-10 text-white">
                 <h1 class="text-3xl font-bold mb-2">Selamat datang, {{ Auth::user()->name }}! ✨</h1>
-                <p class="text-blue-100 text-sm max-w-md">Sistem Informasi Akademik Terpadu. Jangan lupa lakukan absensi hari ini dan cek materi terbaru di LMS.</p>
+                <p class="text-blue-100 text-sm max-w-md">Sistem Informasi Akademik Terpadu. Pantau rekap kehadiranmu dan cek materi terbaru di LMS.</p>
             </div>
             
             <a href="https://perclms.hbii.my.id/" target="_blank" class="relative z-10 bg-white dark:bg-[#050B14] text-blue-600 dark:text-white px-6 py-3.5 rounded-xl text-sm font-semibold transition-all border border-transparent dark:border-gray-800 shadow-xl flex items-center gap-3 group hover:scale-105">
@@ -99,26 +99,15 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1 uppercase tracking-wider">Status Pembayaran</p>
                     <h3 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Pending</h3>
                 </div>
-                <button class="w-full mt-2 text-xs font-semibold text-yellow-600 dark:text-yellow-500 bg-yellow-50 dark:bg-yellow-500/10 hover:bg-yellow-100 dark:hover:bg-yellow-500/20 py-2 rounded-lg transition-colors border border-yellow-200 dark:border-yellow-500/20">
-                    Bayar Tagihan
-                </button>
+                <a href="{{ route('finance.index') }}" class="w-full mt-2 text-center text-xs font-semibold text-yellow-600 dark:text-yellow-500 bg-yellow-50 dark:bg-yellow-500/10 hover:bg-yellow-100 dark:hover:bg-yellow-500/20 py-2 rounded-lg transition-colors border border-yellow-200 dark:border-yellow-500/20 block">
+                    Cek Keuangan
+                </a>
             </div>
         </div>
 
-        @if(session('success'))
-            <div class="mb-4 p-4 text-sm text-green-800 rounded-2xl bg-green-50 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800/50" role="alert">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="mb-4 p-4 text-sm text-red-800 rounded-2xl bg-red-50 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800/50" role="alert">
-                {{ session('error') }}
-            </div>
-        @endif
-
         <div class="bg-white dark:bg-[#0A0F1C] border border-gray-200 dark:border-gray-800/60 rounded-3xl p-6 shadow-sm dark:shadow-xl transition-colors duration-300">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-bold">Jadwal & Absensi Hari Ini</h2>
+                <h2 class="text-lg font-bold">Jadwal Kelas Hari Ini</h2>
                 <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ now()->format('d M Y') }}</span>
             </div>
             
@@ -137,12 +126,14 @@
                         </p>
                     </div>
                 </div>
-                <form action="{{ route('attendance.store') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors shadow-md dark:shadow-lg dark:shadow-blue-900/20">
-                        Isi Kehadiran
-                    </button>
-                </form>
+                
+                <div class="text-right">
+                    <span class="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400">
+                        Tercatat Hadir
+                    </span>
+                    <p class="text-[10px] text-gray-500 mt-2">Diinput oleh Guru</p>
+                </div>
+                
             </div>
         </div>
 
@@ -152,7 +143,6 @@
         var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
         var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
-        // Ubah icon berdasarkan tema saat ini
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             themeToggleLightIcon.classList.remove('hidden');
         } else {
@@ -162,11 +152,9 @@
         var themeToggleBtn = document.getElementById('theme-toggle');
 
         themeToggleBtn.addEventListener('click', function() {
-            // Toggle icon
             themeToggleDarkIcon.classList.toggle('hidden');
             themeToggleLightIcon.classList.toggle('hidden');
 
-            // Cek jika dark mode sebelumnya sudah ada di localstorage
             if (localStorage.getItem('color-theme')) {
                 if (localStorage.getItem('color-theme') === 'light') {
                     document.documentElement.classList.add('dark');
@@ -175,8 +163,6 @@
                     document.documentElement.classList.remove('dark');
                     localStorage.setItem('color-theme', 'light');
                 }
-
-            // Jika belum ada di localstorage (ikut settingan sistem)
             } else {
                 if (document.documentElement.classList.contains('dark')) {
                     document.documentElement.classList.remove('dark');

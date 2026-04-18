@@ -12,6 +12,7 @@
             document.documentElement.classList.remove('dark')
         }
     </script>
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 </head>
 <body class="font-sans antialiased bg-gray-50 dark:bg-[#050B14] text-gray-900 dark:text-white flex h-screen overflow-hidden transition-colors duration-300">
 
@@ -94,12 +95,9 @@
                             <p class="font-bold text-lg text-gray-900 dark:text-white">Rp {{ number_format($invoice->amount, 0, ',', '.') }}</p>
                             
                             @if($invoice->status == 'pending')
-                                <form action="{{ route('finance.pay', $invoice->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" onclick="return confirm('Simulasi Payment Gateway: Apakah kamu yakin ingin membayar tagihan ini?')" class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-900/20 whitespace-nowrap">
-                                        Bayar Sekarang
-                                    </button>
-                                </form>
+                                <button type="button" onclick="payNow({{ $invoice->id }})" class="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-900/20 whitespace-nowrap">
+                                    Bayar Sekarang
+                                </button>
                             @else
                                 <button class="text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap flex items-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -149,6 +147,44 @@
                 }
             }
         });
+    </script>
+
+    <script>
+        function payNow(invoiceId) {
+            // Minta Snap Token ke Controller lu
+            fetch(`/finance/get-token/${invoiceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.token) {
+                        // Kalau token dapet, panggil popup Midtrans
+                        window.snap.pay(data.token, {
+                            onSuccess: function(result) {
+                                alert("Pembayaran berhasil! Tunggu sebentar...");
+                                // Kalau berhasil, arahkan ke route update status (bisa lu custom nanti)
+                                location.reload();
+                            },
+                            onPending: function(result) {
+                                alert("Menunggu pembayaran. Silakan selesaikan di ATM/Aplikasi kamu.");
+                                location.reload();
+                            },
+                            onError: function(result) {
+                                alert("Gagal melakukan pembayaran.");
+                                console.log(result);
+                            },
+                            onClose: function() {
+                                alert('Kamu menutup popup tanpa menyelesaikan pembayaran');
+                            }
+                        });
+                    } else {
+                        alert('Gagal mendapatkan token pembayaran dari server.');
+                        console.error(data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                    alert('Terjadi kesalahan koneksi sistem.');
+                });
+        }
     </script>
 </body>
 </html>
