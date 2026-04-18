@@ -9,7 +9,6 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    // Tambahin ini biar datanya bisa di-insert
     protected $fillable = [
         'user_id',
         'subject_name',

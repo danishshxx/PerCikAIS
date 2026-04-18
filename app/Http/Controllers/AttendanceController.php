@@ -8,39 +8,27 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
-    // Menampilkan Halaman Jadwal & Riwayat Absensi
+    // CUMA ADA FUNGSI INDEX (READ-ONLY)
     public function index()
     {
-        $history = Attendance::where('user_id', Auth::id())
+        $userId = Auth::id();
+
+        // Ambil semua riwayat absensi dari database
+        $history = Attendance::where('user_id', $userId)
                     ->orderBy('attendance_date', 'desc')
                     ->get();
 
-        return view('attendance.index', compact('history'));
-    }
+        // Hitung statistik buat ditampilin di atas layar
+        $totalPertemuan = $history->count();
+        $totalHadir = $history->where('status', 'hadir')->count();
+        $totalSakitIzin = $history->whereIn('status', ['sakit', 'izin'])->count();
+        $totalAlpa = $history->where('status', 'alpa')->count();
 
-    // Menangani Klik Tombol Absensi
-    public function store(Request $request)
-    {
-        $today = now()->format('Y-m-d');
-        $subject = 'Integrasi Aplikasi Enterprise';
+        // Hitung persentase (cegah error dibagi nol)
+        $persentase = $totalPertemuan > 0 ? round(($totalHadir / $totalPertemuan) * 100) : 0;
 
-        // Cek apakah sudah absen hari ini
-        $alreadyAttended = Attendance::where('user_id', Auth::id())
-            ->where('subject_name', $subject)
-            ->where('attendance_date', $today)
-            ->exists();
-
-        if ($alreadyAttended) {
-            return back()->with('error', 'Kamu sudah mengisi kehadiran hari ini.');
-        }
-
-        Attendance::create([
-            'user_id' => Auth::id(),
-            'subject_name' => $subject,
-            'attendance_date' => $today,
-            'status' => 'hadir'
-        ]);
-
-        return back()->with('success', 'Berhasil mengisi kehadiran!');
+        return view('attendance.index', compact(
+            'history', 'totalPertemuan', 'totalHadir', 'totalSakitIzin', 'totalAlpa', 'persentase'
+        ));
     }
 }
