@@ -24,8 +24,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 
     // Finance
+    // Halaman Utama Keuangan
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
-    Route::post('/finance/pay/{id}', [FinanceController::class, 'pay'])->name('finance.pay');
+    Route::get('/finance/get-token/{id}', [FinanceController::class, 'getSnapToken'])->name('finance.token');
+    Route::get('/finance/receipt/{id}', [FinanceController::class, 'receipt'])->name('finance.receipt');
 });
 
 require __DIR__.'/auth.php';

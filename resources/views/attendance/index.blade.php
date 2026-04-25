@@ -43,6 +43,15 @@
             </nav>
         </div>
         <div class="p-6 border-t border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden flex items-center justify-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold">{{ Auth::user()->name }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Siswa Aktif</p>
+                </div>
+            </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="w-full text-xs font-semibold text-red-500 bg-red-50 dark:bg-red-500/10 py-2.5 rounded-lg">Keluar Sistem</button>
