@@ -9,10 +9,11 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'subject_name',
-        'attendance_date',
-        'status',
-    ];
-}
+    protected $guarded = []; // Buka gembok keamanan mass assignment
+
+    // Relasi: Absen ini punya 1 siswa
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}   

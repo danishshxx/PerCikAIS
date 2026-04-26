@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Attendance;
 use Illuminate\Support\Facades\Auth;
 
+
 class AttendanceController extends Controller
 {
     // CUMA ADA FUNGSI INDEX (READ-ONLY)

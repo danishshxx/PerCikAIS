@@ -44,24 +44,37 @@ class GoogleAuthController extends Controller
     public function callback()
     {
         try {
-            // 👇 TAMBAHIN STATELESS() DI SINI BANG 👇
-            $googleUser = Socialite::driver('google')->stateless()->user();
+        // 1. Tangkap data dari Google
+        $googleUser = Socialite::driver('google')->user();
 
-            // CEK KEAMANAN: Cari apakah email Google ini ada di database kita?
-            $registeredUser = User::where('email', $googleUser->email)->first();
-
-            if ($registeredUser) {
-                // Kalau terdaftar, langsung loginin
-                Auth::login($registeredUser);
-                return redirect()->intended('/dashboard');
-            } else {
-                // Kalau gak terdaftar, tendang balik!
-                return redirect('/login')->with('error', 'Akses ditolak! Email tidak terdaftar di sistem sekolah. Silakan hubungi Administrator.');
-            }
-
-        } catch (\Exception $e) {
-            // dd() nya kita hapus, balikin ke aslinya
-            return redirect('/login')->with('error', 'Terjadi kesalahan saat login dengan Google.');
+        // 2. Cari user di database, atau daftarin kalau belum ada
+        $user = User::where('email', $googleUser->getEmail())->first();
+        
+        if (!$user) {
+            $user = User::create([
+                'name' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                // Password diacak aja karena loginnya pake Google
+                'password' => bcrypt(uniqid()), 
+                // Otomatis jadi siswa kalau baru pertama kali daftar
+                'role' => 'student' 
+            ]);
         }
+
+        // 3. MASUKIN DIA KE SISTEM LARAVEL (LOGIN) - Wajib sebelum ngecek role!
+        Auth::login($user);
+
+        // 4. PERSIMPANGAN JALAN (Cek role pakai variabel $user langsung)
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard'); // Lempar ke Dapur Admin
+        }
+
+        return redirect()->route('dashboard'); // Lempar ke Halaman Siswa
+
+    } catch (\Exception $e) {
+        // Balikin peredam kejutnya biar aman
+        // dd($e->getMessage()); // (Bisa lu hapus atau di-comment aja sekarang)
+        return redirect('/login')->with('error', 'Terjadi kesalahan saat login dengan Google.');
+    }
     }
 }

@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('subject_name'); // Misal: "Integrasi Aplikasi Enterprise"
+            // Sambungin ke tabel users (siswa)
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('subject_name');
             $table->date('attendance_date');
-            $table->enum('status', ['hadir', 'izin', 'sakit', 'alpa'])->default('alpa');
+            $table->enum('status', ['Hadir', 'Sakit', 'Izin', 'Alpa']);
             $table->timestamps();
         });
-    }
+    }   
 
     /**
      * Reverse the migrations.

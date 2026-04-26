@@ -5,6 +5,7 @@ use App\Http\Controllers\AttendanceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\AdminController;
 
 Route::redirect('/', '/login');
 
@@ -33,4 +34,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/finance/receipt/{id}/download', [FinanceController::class, 'downloadPDF'])->name('finance.receipt.download');
 });
 
+Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin')->group(function () {
+    
+    // Dashboard Admin
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+    // Fitur Absensi & Jadwal Admin
+    Route::get('/attendance', [AdminController::class, 'attendance'])->name('admin.attendance');
+    Route::post('/attendance/store', [AdminController::class, 'storeAttendance'])->name('admin.attendance.store');
+    
+    // Kelola Siswa
+    Route::get('/students', [AdminController::class, 'students'])->name('admin.students');
+    Route::post('/students/store', [AdminController::class, 'storeStudent'])->name('admin.students.store');
+
+    // Fitut kelola keuangan
+    Route::get('/finance', [AdminController::class, 'finance'])->name('admin.finance');
+    Route::post('/finance/store', [AdminController::class, 'storeInvoice'])->name('admin.finance.store');
+});
 require __DIR__.'/auth.php';
