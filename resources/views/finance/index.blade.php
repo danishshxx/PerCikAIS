@@ -12,6 +12,7 @@
             document.documentElement.classList.remove('dark')
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 </head>
 <body class="font-sans antialiased bg-gray-50 dark:bg-[#050B14] text-gray-900 dark:text-white flex h-screen overflow-hidden transition-colors duration-300">
@@ -160,40 +161,116 @@
 
     <script>
         function payNow(invoiceId) {
-            // Minta Snap Token ke Controller lu
+            // 1. Panggil Layar Loading Logo Sekolah
+            const loader = document.getElementById('custom-loader');
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+
+            // 2. Minta Snap Token ke Server
             fetch(`/finance/get-token/${invoiceId}`)
                 .then(response => response.json())
                 .then(data => {
                     if(data.token) {
-                        // Kalau token dapet, panggil popup Midtrans
+                        // 3. Token dapet, tutup layar loading!
+                        loader.classList.remove('flex');
+                        loader.classList.add('hidden');
+                        
+                        // 4. Buka Popup Midtrans
                         window.snap.pay(data.token, {
                             onSuccess: function(result) {
-                                alert("Pembayaran berhasil! Tunggu sebentar...");
-                                // Kalau berhasil, arahkan ke route update status (bisa lu custom nanti)
-                                location.reload();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Pembayaran Berhasil!',
+                                    text: 'Terima kasih, tagihan kamu sudah lunas.',
+                                    confirmButtonColor: '#2563EB'
+                                }).then(() => { location.reload(); });
                             },
                             onPending: function(result) {
-                                alert("Menunggu pembayaran. Silakan selesaikan di ATM/Aplikasi kamu.");
-                                location.reload();
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Menunggu Pembayaran',
+                                    text: 'Silakan selesaikan pembayaran sesuai instruksi.',
+                                    confirmButtonColor: '#2563EB'
+                                }).then(() => { location.reload(); });
                             },
                             onError: function(result) {
-                                alert("Gagal melakukan pembayaran.");
-                                console.log(result);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Pembayaran Gagal',
+                                    text: 'Terjadi kesalahan saat memproses pembayaran.',
+                                    confirmButtonColor: '#2563EB'
+                                }).then(() => { location.reload(); });
                             },
+                            
                             onClose: function() {
-                                alert('Kamu menutup popup tanpa menyelesaikan pembayaran');
+                                // 👇 UPDATE FUNGSI KETIKA TOMBOL SILANG DIKLIK 👇
+                                
+                                // 1. Ambil ID Layar Batal
+                                const cancelledLoader = document.getElementById('cancelled-loader');
+                                
+                                // 2. Munculin layarnya (Ganti hidden jadi flex)
+                                cancelledLoader.classList.remove('hidden');
+                                cancelledLoader.classList.add('flex');
+                                
+                                // 3. Set timer: Ilang sendiri abis 3 detik (3000 ms)
+                                setTimeout(function() {
+                                    // Tutup layarnya lagi
+                                    cancelledLoader.classList.remove('flex');
+                                    cancelledLoader.classList.add('hidden');
+                                    
+                                    // Opsi: Lu bisa nambahin location.reload() di sini kalau mau halamannya seger lagi, 
+                                    // tapi mending diem gini aja biar murid kaga bingung.
+                                }, 800); 
+
+                                console.log('User membatalkan transaksi.');
                             }
+
                         });
                     } else {
-                        alert('Gagal mendapatkan token pembayaran dari server.');
-                        console.error(data);
+                        // Tutup loader kalau error token
+                        loader.classList.remove('flex');
+                        loader.classList.add('hidden');
+                        Swal.fire({ icon: 'error', title: 'Error Server', text: 'Gagal mendapatkan tiket pembayaran dari server.', confirmButtonColor: '#2563EB' });
                     }
                 })
                 .catch(error => {
-                    console.error('Fetch Error:', error);
-                    alert('Terjadi kesalahan koneksi sistem.');
+                    // Tutup loader kalau error internet/fetch
+                    loader.classList.remove('flex');
+                    loader.classList.add('hidden');
+                    Swal.fire({ icon: 'error', title: 'Koneksi Terputus', text: 'Terjadi kesalahan sistem atau jaringan.', confirmButtonColor: '#2563EB' });
                 });
         }
     </script>
+
+    <div id="custom-loader" class="fixed inset-0 z-[9999] bg-gray-900/60 backdrop-blur-sm hidden items-center justify-center transition-all duration-300">
+        <div class="bg-white dark:bg-[#0A0F1C] p-8 rounded-3xl shadow-2xl flex flex-col items-center max-w-sm w-full mx-4 border border-gray-200 dark:border-gray-800 transform transition-all">
+            
+            <div class="relative w-24 h-24 mb-6 flex items-center justify-center">
+                <img src="https://ui-avatars.com/api/?name=S&background=2563EB&color=fff&rounded=true&size=128" 
+                     alt="Logo Sekolah" 
+                     class="w-16 h-16 object-contain animate-pulse relative z-10 rounded-full shadow-md">
+                
+                <div class="absolute inset-0 border-4 border-blue-100 dark:border-blue-900/50 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center tracking-wide">Memproses...</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center animate-pulse">Menyiapkan gerbang pembayaran yang aman.</p>
+        </div>
+    </div>
+
+    <div id="cancelled-loader" class="fixed inset-0 z-[9999] bg-gray-900/60 backdrop-blur-sm hidden items-center justify-center transition-all duration-300">
+        <div class="bg-white dark:bg-[#0A0F1C] p-8 rounded-3xl shadow-2xl flex flex-col items-center max-w-sm w-full mx-4 border border-gray-200 dark:border-gray-800 transform transition-all">
+            
+            <div class="w-20 h-20 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center tracking-wide">Transaksi Batal</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 text-center">Kamu menutup gerbang pembayaran. Silakan coba lagi nanti.</p>
+        </div>
+    </div>
 </body>
 </html>

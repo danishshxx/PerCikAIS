@@ -56,12 +56,41 @@
             <p class="text-xs text-gray-500 mt-1 transition-colors duration-500">Gunakan email Google Workspace sekolah yang telah didaftarkan oleh admin.</p>
         </div>
 
-        <a href="{{ route('google.login') }}" class="w-full text-white bg-blue-600 hover:bg-blue-700 dark:bg-[#3B82F6] dark:hover:bg-[#2563EB] focus:ring-4 focus:outline-none focus:ring-blue-500/50 font-medium rounded-xl text-sm px-5 py-3.5 text-center shadow-lg dark:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all flex justify-center items-center gap-2 cursor-pointer">
+        <a href="{{ url('/auth/google') }}" 
+            onclick="document.getElementById('custom-loader').classList.remove('hidden'); document.getElementById('custom-loader').classList.add('flex');"
+            class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center transition-colors">
             Masuk dengan Google
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
         </a>
 
         <p class="text-center text-xs text-gray-400 dark:text-gray-600 mt-8 transition-colors duration-500">Hubungi Administrator jika akun bermasalah.</p>
+    </div>
+
+    <script>
+        function prosesLoginGoogle(event, url) {
+            event.preventDefault(); // Tahan dulu biar ga langsung pindah
+
+            // Munculin layar loading logo
+            const loader = document.getElementById('custom-loader');
+            if (loader) {
+                loader.classList.remove('hidden');
+                loader.classList.add('flex');
+            }
+
+            // Kasih jeda 0.5 detik biar animasinya nongol dulu, baru pindah ke Google
+            setTimeout(() => {
+                window.location.href = url;
+            }, 300);
+        }
+    </script>
+
+    <div id="custom-loader" class="fixed inset-0 z-[9999] bg-white/80 dark:bg-[#050B14]/90 backdrop-blur-md hidden flex-col items-center justify-center transition-all duration-300">
+        <div class="relative w-28 h-28 mb-6 flex items-center justify-center">
+            <img src="https://ui-avatars.com/api/?name=S&background=2563EB&color=fff&rounded=true&size=128" alt="Logo" class="w-20 h-20 object-contain animate-pulse drop-shadow-2xl z-10 relative">
+            <div class="absolute inset-0 border-4 border-blue-200 dark:border-blue-900/50 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white tracking-wider uppercase mb-1">Perguruan Cikini</h3>
+        <p class="text-sm font-medium text-blue-600 dark:text-blue-400 animate-pulse">Menghubungkan ke Google...</p>
     </div>
 
 </body>

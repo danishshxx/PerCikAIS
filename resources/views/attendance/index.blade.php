@@ -36,9 +36,18 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     Rekap Kehadiran
                 </a>
-                <a href="{{ route('finance.index') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121A2F]">
+                <a href="{{ route('finance.index') }}" class="flex items-center gap-3 py-3 px-4 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-[#121A2F] transition-colors relative">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                     Keuangan
+                    
+                    @php
+                        $pendingCount = \App\Models\Invoice::where('user_id', Auth::id())->where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingCount > 0)
+                        <span class="absolute right-4 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                            {{ $pendingCount }}
+                        </span>
+                    @endif
                 </a>
             </nav>
         </div>

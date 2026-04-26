@@ -28,6 +28,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
     Route::get('/finance/get-token/{id}', [FinanceController::class, 'getSnapToken'])->name('finance.token');
     Route::get('/finance/receipt/{id}', [FinanceController::class, 'receipt'])->name('finance.receipt');
+
+    //Kuitansi
+    Route::get('/finance/receipt/{id}/download', [FinanceController::class, 'downloadPDF'])->name('finance.receipt.download');
 });
 
 require __DIR__.'/auth.php';
