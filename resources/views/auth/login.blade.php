@@ -33,7 +33,7 @@
     </div>
 
     <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight transition-colors duration-500">Selamat Datang</h2>
-    <p class="text-gray-500 dark:text-gray-400 mb-8 text-sm transition-colors duration-500">Silakan masuk ke portal terpadu pErC LMS</p>
+    <p class="text-gray-500 dark:text-gray-400 mb-8 text-sm transition-colors duration-500">Silakan melakukan Login untuk melanjutkan</p>
 
     <div class="w-full max-w-[420px] bg-white dark:bg-[#0A0F1C] border border-gray-200 dark:border-gray-800/60 rounded-3xl p-8 shadow-xl dark:shadow-2xl transition-colors duration-500">
         

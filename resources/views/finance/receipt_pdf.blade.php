@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Kuitansi SIAKAD</title>
+    <title>Kuitansi PerCikAIS</title>
     <style>
         body { font-family: Arial, sans-serif; color: #333; }
         .header { border-bottom: 2px solid #3B82F6; padding-bottom: 10px; margin-bottom: 20px; }
@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="header">
-        <span class="title">SIAKAD PErC</span>
+        <span class="title">PerCikAIS PErC</span>
         <p style="margin: 0; font-size: 12px; color: #666;">Institut Teknologi & Bisnis Cikini</p>
     </div>
 

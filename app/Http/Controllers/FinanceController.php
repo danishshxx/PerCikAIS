@@ -83,6 +83,6 @@ class FinanceController extends Controller
         $pdf = Pdf::loadView('finance.receipt_pdf', compact('invoice'));
         
         // Langsung suruh browser download
-        return $pdf->download('Kuitansi_SIAKAD_' . $invoice->order_id . '.pdf');
+        return $pdf->download('Kuitansi_PerCikAIS_' . $invoice->order_id . '.pdf');
     }
 }

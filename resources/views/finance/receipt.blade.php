@@ -24,7 +24,7 @@
                 <div>
                     <div class="flex items-center gap-3 mb-2">
                         <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl text-white">S</div>
-                        <h1 class="text-2xl font-bold tracking-tight text-gray-900">SIAKAD</h1>
+                        <h1 class="text-2xl font-bold tracking-tight text-gray-900">PerCikAIS</h1>
                     </div>
                     <p class="text-sm text-gray-500">Institut Teknologi & Bisnis Cikini<br>Jl. Pendidikan No. 123, Jakarta Raya</p>
                 </div>

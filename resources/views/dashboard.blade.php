@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dasbor SIAKAD - Integrasi LMS</title>
+    <title>Dasbor PerCikAIS - Integrasi LMS</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <script>
@@ -21,7 +21,7 @@
             <div class="flex items-center justify-between mb-10">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-xl text-white">S</div>
-                    <span class="text-lg font-bold tracking-wider">SIAKAD</span>
+                    <span class="text-lg font-bold tracking-wider">PerCikAIS</span>
                 </div>
                 
                 <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none rounded-lg text-sm p-2.5 transition-colors">
@@ -81,7 +81,7 @@
             
             <div class="relative z-10 text-white">
                 <h1 class="text-3xl font-bold mb-2">Selamat datang, {{ Auth::user()->name }}! ✨</h1>
-                <p class="text-blue-100 text-sm max-w-md">Sistem Informasi Akademik Terpadu. Pantau rekap kehadiranmu dan cek materi terbaru di LMS.</p>
+                <p class="text-blue-100 text-sm max-w-md">Perguruan Cikini Academic Information System (PerCikAIS).</p>
             </div>
             
             <a href="https://perclms.hbii.my.id/" target="_blank" class="relative z-10 bg-white dark:bg-[#050B14] text-blue-600 dark:text-white px-6 py-3.5 rounded-xl text-sm font-semibold transition-all border border-transparent dark:border-gray-800 shadow-xl flex items-center gap-3 group hover:scale-105">
