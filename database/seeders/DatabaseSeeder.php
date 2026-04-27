@@ -3,14 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-<<<<<<< HEAD
-use Illuminate\Support\Facades\Hash;
-
-=======
 use App\Models\User;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\Hash;
->>>>>>> 0fb1b5bafcc112096ddd25566451633c84c16876
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -23,12 +19,12 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
         ]);
 
-<<<<<<< HEAD
+
         User::create([
             'name' => 'Dummy Siswa',
             'email' => 'murid@sekolah.com', // Ini yang lu masukin di Identifier nanti
             'password' => Hash::make('password123'), // Passwordnya ini
-=======
+	]);
         // 2. Bikin tagihan yang belum dibayar (Pending)
         Invoice::create([
             'user_id' => $user->id,
@@ -45,7 +41,6 @@ class DatabaseSeeder extends Seeder
             'description' => 'Uang Pangkal / Pembangunan',
             'amount' => 12500000,
             'status' => 'paid',
->>>>>>> 0fb1b5bafcc112096ddd25566451633c84c16876
         ]);
     }
 }

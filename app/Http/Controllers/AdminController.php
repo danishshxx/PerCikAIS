@@ -26,7 +26,29 @@ class AdminController extends Controller
         return view('admin.students', compact('students'));
     }
 
-    // 👇 TAMBAHIN FUNGSI INI BANG 👇
+    public function teachers()
+    {
+        $teachers = User::where('role', 'teacher')->orderBy('created_at', 'desc')->get();
+        return view('admin.teachers', compact('teachers'));
+    }
+
+    public function storeTeacher(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt('gurupercik123'),
+            'role' => 'teacher',
+        ]);
+
+        return redirect()->route('admin.teachers')->with('success', 'Akun Guru berhasil didaftarkan!');
+    }
+
     // Fungsi buat Simpan Data Siswa Baru
     public function storeStudent(Request $request)
     {
@@ -58,6 +80,13 @@ class AdminController extends Controller
     // TAMBAHIN FUNGSI INI: Buat nyimpen data pas tombol ditekan
     public function storeAttendance(Request $request)
     {
+        $student = User::findOrFail($request->user_id);
+
+        // CEK APAKAH MURID PUNYA TUNGGAKAN
+        if ($student->hasUnpaidInvoices()) {
+            return redirect()->route('admin.attendance')->with('error', 'Gagal! Murid ini (' . $student->name . ') masih memiliki tunggakan administrasi yang belum lunas.');
+        }
+
         Attendance::create([
             'user_id' => $request->user_id,
             'subject_name' => $request->subject_name,

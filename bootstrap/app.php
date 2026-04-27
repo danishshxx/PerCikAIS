@@ -11,7 +11,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->validateCsrfTokens(except: [
+            '/finance/notification',
+        ]);
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\IsAdmin::class,
+            'teacher' => \App\Http\Middleware\IsTeacher::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

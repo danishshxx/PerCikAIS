@@ -65,11 +65,15 @@ class GoogleAuthController extends Controller
         Auth::login($user);
 
         // 4. PERSIMPANGAN JALAN (Cek role pakai variabel $user langsung)
-        if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard'); // Lempar ke Dapur Admin
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard'); 
+        }
+        
+        if ($user->isTeacher()) {
+            return redirect()->route('teacher.dashboard');
         }
 
-        return redirect()->route('dashboard'); // Lempar ke Halaman Siswa
+        return redirect()->route('dashboard'); 
 
     } catch (\Exception $e) {
         // Balikin peredam kejutnya biar aman
