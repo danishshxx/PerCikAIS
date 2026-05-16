@@ -11,6 +11,7 @@ Route::redirect('/', '/login');
 
 Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
+Route::post('/auth/qr-login', [GoogleAuthController::class, 'qrLoginCallback']);
 
 // Midtrans Notification (Webhook)
 Route::post('/finance/notification', [FinanceController::class, 'handleNotification']);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
 use Illuminate\Support\Facades\Auth;
+use App\Models\LmsCourse;
 
 class AttendanceController extends Controller
 {
@@ -26,9 +27,11 @@ class AttendanceController extends Controller
 
         // Hitung persentase
         $persentase = $totalPertemuan > 0 ? round(($totalHadir / $totalPertemuan) * 100) : 0;
+        // Ambil data kursus dari LMS
+        $lmsCourses = LmsCourse::orderBy('createdAt', 'desc')->get();
         
         return view('attendance.index', compact(
-            'history', 'totalPertemuan', 'totalHadir', 'totalSakitIzin', 'totalAlpa', 'persentase', 'hasUnpaid'
+            'history', 'totalPertemuan', 'totalHadir', 'totalSakitIzin', 'totalAlpa', 'persentase', 'hasUnpaid', 'lmsCourses'
         ));
     }
 
@@ -41,9 +44,13 @@ class AttendanceController extends Controller
         }
 
         $request->validate([
-            'subject_name' => 'required|string|max:255',
+            'course_id' => 'required|string',
             'status' => 'required|in:Hadir,Izin',
         ]);
+
+        // Cari data kursus di LMS untuk mengambil nama pelajarannya
+        $course = LmsCourse::find($request->course_id);
+        $subjectName = $course ? $course->title : 'Mata Pelajaran Tidak Diketahui';
 
         // Kalau absen hadir langsung verified (asumsi kejujuran/geofencing etc bisa dikembangin)
         // Kalau izin harus false biar di-acc guru
@@ -51,7 +58,8 @@ class AttendanceController extends Controller
 
         Attendance::create([
             'user_id' => $user->id,
-            'subject_name' => $request->subject_name,
+            'course_id' => $request->course_id,
+            'subject_name' => $subjectName,
             'attendance_date' => date('Y-m-d'),
             'status' => $request->status,
             'is_verified' => $isVerified

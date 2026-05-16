@@ -81,4 +81,40 @@ class GoogleAuthController extends Controller
         return redirect('/login')->with('error', 'Terjadi kesalahan saat login dengan Google.');
     }
     }
+
+    public function qrLoginCallback(Request $request)
+    {
+        try {
+            $qrJwt = $request->input('qrJwt');
+            if (!$qrJwt) {
+                return response()->json(['error' => 'No QR token provided'], 400);
+            }
+
+            // Simple decoding since we trust the backend
+            $parts = explode('.', $qrJwt);
+            if (count($parts) < 2) return response()->json(['error' => 'Invalid token'], 400);
+            
+            $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $parts[1])));
+            if (!$payload || !isset($payload->sub)) {
+                return response()->json(['error' => 'Invalid token payload'], 400);
+            }
+
+            $user = User::where('email', $payload->sub)->first();
+            if (!$user) {
+                return response()->json(['error' => 'User not found in SIAKAd'], 404);
+            }
+
+            Auth::login($user);
+
+            // Redirect URL depending on role
+            $redirectUrl = route('dashboard');
+            if ($user->isAdmin()) $redirectUrl = route('admin.dashboard');
+            else if ($user->isTeacher()) $redirectUrl = route('teacher.dashboard');
+
+            return response()->json(['success' => true, 'redirect' => $redirectUrl]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

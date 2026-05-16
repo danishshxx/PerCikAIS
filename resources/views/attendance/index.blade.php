@@ -60,12 +60,11 @@
                     @csrf
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="flex-[2]">
-                            <select name="subject_name" required class="w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-[#050B14] dark:text-white focus:border-blue-500 focus:ring-blue-500 text-sm">
-                                <option value="">-- Pilih Mata Pelajaran --</option>
-                                <option value="Teknologi Informasi & Komunikasi">Teknologi Informasi & Komunikasi</option>
-                                <option value="Matematika Terapan">Matematika Terapan</option>
-                                <option value="Bahasa Inggris">Bahasa Inggris</option>
-                                <option value="Fisika Modern">Fisika Modern</option>
+                            <select name="course_id" required class="w-full rounded-xl border-gray-300 dark:border-gray-700 dark:bg-[#050B14] dark:text-white focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                <option value="">-- Pilih Mata Pelajaran (Dari LMS) --</option>
+                                @foreach($lmsCourses as $course)
+                                    <option value="{{ $course->id }}">{{ $course->title }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="flex-1">

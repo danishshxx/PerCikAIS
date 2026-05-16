@@ -6,23 +6,6 @@
     <title>Login - PErC LMS Integrasi</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <script>
-        // Kalau settingan sistemnya Dark Mode, tambahin class 'dark'
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        
-        // Opsional: Bikin layarnya langsung berubah kalau user ganti tema device pas lagi buka web
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
-    </script>
 </head>
 <body class="font-sans antialiased bg-gray-50 dark:bg-[#050B14] min-h-screen flex flex-col justify-center items-center selection:bg-blue-500 selection:text-white transition-colors duration-500">
 
@@ -58,13 +41,55 @@
 
         <a href="{{ url('/auth/google') }}" 
             onclick="document.getElementById('custom-loader').classList.remove('hidden'); document.getElementById('custom-loader').classList.add('flex');"
-            class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center transition-colors">
+            class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center transition-colors mb-3">
             Masuk dengan Google
         </a>
+
+        <div class="flex items-center gap-4 my-4">
+            <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+            <span class="text-xs font-medium text-gray-400 uppercase tracking-widest">Atau</span>
+            <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+        </div>
+
+        <button type="button" onclick="openQrModal()"
+            class="w-full text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+            Login dengan Kode QR
+        </button>
 
         <p class="text-center text-xs text-gray-400 dark:text-gray-600 mt-8 transition-colors duration-500">Hubungi Administrator jika akun bermasalah.</p>
     </div>
 
+    <!-- QR Modal -->
+    <div id="qr-modal" class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm hidden flex-col items-center justify-center">
+        <div class="bg-white dark:bg-[#121A2F] rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-300">
+            <button onclick="closeQrModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 mb-4">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Login dengan QR</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                    Buka aplikasi MyPercik, lalu scan QR code ini.
+                </p>
+                
+                <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-2xl flex items-center justify-center min-h-[250px]">
+                    <div id="qr-loading" class="animate-spin text-gray-400">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </div>
+                    <img id="qr-image" class="hidden rounded-xl shadow-sm" alt="QR Code" />
+                </div>
+                
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-6 animate-pulse">
+                    Menunggu hasil scan...
+                </p>
+                <div id="qr-error" class="hidden text-xs text-red-500 mt-2"></div>
+            </div>
+        </div>
+
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script>
         function prosesLoginGoogle(event, url) {
             event.preventDefault(); // Tahan dulu biar ga langsung pindah
@@ -80,6 +105,83 @@
             setTimeout(() => {
                 window.location.href = url;
             }, 300);
+        }
+
+        let qrPollInterval = null;
+
+        async function openQrModal() {
+            const modal = document.getElementById('qr-modal');
+            const loading = document.getElementById('qr-loading');
+            const qrImage = document.getElementById('qr-image');
+            const errorDiv = document.getElementById('qr-error');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            loading.classList.remove('hidden');
+            qrImage.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+
+            try {
+                // Generate QR Token dari Backend Rust
+                const res = await fetch('https://percikapi.hbii.my.id/api/auth/qr/generate', { method: 'POST' });
+                if (!res.ok) throw new Error('Gagal terhubung ke server');
+                const data = await res.json();
+                const token = data.qr_token;
+
+                // Tampilkan QR Code (pake API goqr.me biar gampang tanpa library berat)
+                qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${token}`;
+                qrImage.onload = () => {
+                    loading.classList.add('hidden');
+                    qrImage.classList.remove('hidden');
+                };
+
+                // Mulai Polling
+                if (qrPollInterval) clearInterval(qrPollInterval);
+                qrPollInterval = setInterval(async () => {
+                    try {
+                        const statusRes = await fetch(`https://percikapi.hbii.my.id/api/auth/qr/status?token=${token}`);
+                        if (!statusRes.ok) return;
+                        const statusData = await statusRes.json();
+
+                        if (statusData.status === 'approved' && statusData.token) {
+                            clearInterval(qrPollInterval);
+                            
+                            // Kirim JWT ke Laravel buat diproses login
+                            const loginRes = await fetch('/auth/qr-login', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({ qrJwt: statusData.token })
+                            });
+
+                            const loginData = await loginRes.json();
+                            if (loginData.success) {
+                                window.location.href = loginData.redirect;
+                            } else {
+                                errorDiv.textContent = loginData.error || 'Gagal login ke SIAKAd';
+                                errorDiv.classList.remove('hidden');
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Polling error', e);
+                    }
+                }, 2000);
+
+            } catch (error) {
+                loading.classList.add('hidden');
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function closeQrModal() {
+            if (qrPollInterval) clearInterval(qrPollInterval);
+            const modal = document.getElementById('qr-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
     </script>
 
