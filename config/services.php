@@ -41,4 +41,7 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', env('GOOGLE_CALLBACK_URL')),
     ],
 
+    'lms' => [
+    'enabled' => env('LMS_INTEGRATION', false),
+    ],
 ];

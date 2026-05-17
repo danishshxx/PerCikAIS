@@ -132,6 +132,22 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'mysql_lms' => [
+        'driver' => 'mysql',
+        'host' => env('LMS_DB_HOST', '127.0.0.1'),
+        'port' => env('LMS_DB_PORT', '3306'),
+        'database' => env('LMS_DB_DATABASE', 'forge'),
+        'username' => env('LMS_DB_USERNAME', 'forge'),
+        'password' => env('LMS_DB_PASSWORD', ''),
+        'unix_socket' => env('DB_SOCKET', ''),
+        'charset' => env('DB_CHARSET', 'utf8mb4'),
+        'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+        'prefix' => '',
+        'prefix_indexes' => true,
+        'strict' => true,
+        'engine' => null,
+],
+
     ],
 
     /*

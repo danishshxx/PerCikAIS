@@ -90,7 +90,7 @@
 
             <div class="p-4 border-t border-slate-100 dark:border-slate-800/40 bg-slate-50/50 dark:bg-[#121929]/30 rounded-t-2xl">
                 <div class="flex items-center gap-3 mb-4 px-2">
-                    <img src="https://ui-avatars.com/api/?name=Muhammad+Danish&background=2563eb&color=fff" class="w-9 h-9 rounded-xl shadow-sm">
+                    src="{{ $user->profile_photo_url }}"
                     <div class="flex flex-col truncate">
                         <span class="text-xs font-bold text-slate-800 dark:text-white truncate">M. Danish</span>
                         <span class="text-[10px] text-slate-400 font-medium">Super Administrator</span>

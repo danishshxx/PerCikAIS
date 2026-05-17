@@ -11,7 +11,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-#[Fillable(['id', 'name', 'email', 'password', 'role', 'nisn', 'kelas'])]
+#[Fillable(['id', 'name', 'email', 'password', 'role', 'nisn', 'kelas', 'name',
+'profile_photo_path',
+'phone',
+'gender',
+'birth_place',
+'birth_date',
+'address',])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -19,7 +25,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     // Unified DB: Prisma-style User table with string IDs
-    protected $table = 'User';
+    // protected $table = 'User';
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
@@ -44,12 +50,23 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birth_date' => 'date',
         ];
+    }
+
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        if ($this->profile_photo_path) {
+            return asset('storage/' . $this->profile_photo_path);
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name ?? 'User') . '&background=2563eb&color=fff&bold=true';
     }
 
     public function invoices()

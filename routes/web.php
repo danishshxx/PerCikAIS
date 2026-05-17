@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\AdminController;
+use Illuminate\Support\Facades\Auth;
 
 Route::redirect('/', '/login');
 
@@ -29,8 +30,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/attendance/store', [AttendanceController::class, 'store'])->name('attendance.store');
 
+    // Settings
+    Route::view('/settings', 'settings.index')->name('settings.index');
+    
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Finance
     // Halaman Utama Keuangan
