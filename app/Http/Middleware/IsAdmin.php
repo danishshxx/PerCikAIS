@@ -10,8 +10,8 @@ class IsAdmin
 {
     public function handle(Request $request, Closure $next)
     {
-        // Cek apakah user login DAN rolenya ADMIN (huruf besar)
-        if (Auth::check() && Auth::user()->role === 'ADMIN') {
+        // Cek apakah user login DAN rolenya ADMIN
+        if (Auth::check() && Auth::user()->isAdmin()) {
             return $next($request);
         }
         

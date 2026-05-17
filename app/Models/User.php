@@ -64,16 +64,16 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return $this->role === 'ADMIN';
     }
 
     public function isTeacher()
     {
-        return $this->role === 'teacher';
+        return $this->role === 'TEACHER';
     }
 
     public function isStudent()
     {
-        return $this->role === 'student';
+        return $this->role === 'STUDENT';
     }
 }
