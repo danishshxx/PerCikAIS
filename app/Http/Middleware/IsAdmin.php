@@ -10,12 +10,11 @@ class IsAdmin
 {
     public function handle(Request $request, Closure $next)
     {
-        // Kalau dia udah login DAN role-nya admin, silakan masuk
-        if (Auth::check() && Auth::user()->role == 'admin') {
+        // Cek apakah user login DAN rolenya ADMIN (huruf besar)
+        if (Auth::check() && Auth::user()->role === 'ADMIN') {
             return $next($request);
         }
-
-        // Kalau dia siswa, tendang balik ke dashboard siswa!
-        return redirect('/dashboard')->with('error', 'Akses Ditolak! Kamu bukan Admin.');
+        
+        return redirect('/dashboard');
     }
 }

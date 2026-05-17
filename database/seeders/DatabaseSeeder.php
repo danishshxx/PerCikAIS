@@ -7,40 +7,46 @@ use App\Models\User;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\Hash;
 
-
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Bikin akun dummy
-        $user = User::create([
-            'name' => 'Danish Abrisam', // Nama lu bebas
-            'email' => 'dnshconquer@gmail.com', //
-            'password' => Hash::make('password123'),
-        ]);
+        // 1. Bikin akun utama lu (Paksa jadi Admin)
+        $user = new User();
+        $user->name = 'Muhammad Danish'; 
+        $user->email = 'dnshconquer@gmail.com'; // Pastiin ini email Google lu yg dipake login!
+        $user->password = Hash::make('password123');
+        $user->role = 'admin'; // Wajib diisi biar bisa masuk rute admin.dashboard
+        $user->timestamps = false; // Matikan paksa timestamp
+        $user->save();
 
+        // Bikin akun dummy siswa
+        $student = new User();
+        $student->name = 'Dummy Siswa';
+        $student->email = 'murid@sekolah.com'; 
+        $student->password = Hash::make('password123');
+        $student->role = 'student'; 
+        $student->timestamps = false; // Matikan paksa timestamp
+        $student->save();
 
-        User::create([
-            'name' => 'Dummy Siswa',
-            'email' => 'murid@sekolah.com', // Ini yang lu masukin di Identifier nanti
-            'password' => Hash::make('password123'), // Passwordnya ini
-	]);
         // 2. Bikin tagihan yang belum dibayar (Pending)
-        Invoice::create([
-            'user_id' => $user->id,
-            'order_id' => 'INV-' . time() . '-01',
-            'description' => 'SPP Semester Ganjil 2026',
-            'amount' => 4500000,
-            'status' => 'pending',
-        ]);
+        $invoice1 = new Invoice();
+        $invoice1->user_id = $user->id;
+        $invoice1->order_id = 'INV-' . time() . '-01';
+        $invoice1->description = 'SPP Semester Ganjil 2026';
+        $invoice1->amount = 4500000;
+        $invoice1->status = 'pending';
+        $invoice1->timestamps = false; // Matikan paksa timestamp
+        $invoice1->save();
 
         // 3. Bikin riwayat tagihan yang udah lunas (Paid)
-        Invoice::create([
-            'user_id' => $user->id,
-            'order_id' => 'INV-' . (time() - 86400) . '-02',
-            'description' => 'Uang Pangkal / Pembangunan',
-            'amount' => 12500000,
-            'status' => 'paid',
-        ]);
+        $invoice2 = new Invoice();
+        $invoice2->user_id = $user->id;
+        $invoice2->order_id = 'INV-' . (time() - 86400) . '-02';
+        $invoice2->description = 'Uang Pangkal / Pembangunan';
+        $invoice2->amount = 12500000;
+        $invoice2->status = 'paid';
+        $invoice2->timestamps = false; // Matikan paksa timestamp
+        $invoice2->save();
     }
 }

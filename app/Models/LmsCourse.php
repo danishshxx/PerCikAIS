@@ -10,7 +10,9 @@ class LmsCourse extends Model
     use HasFactory;
 
     // Use the LMS database connection
-    protected $connection = 'mysql_lms';
+    // protected $connection = 'mysql_lms';
+
+    public $timestamps = false;
 
     // Specify the table name (Prisma defaults to PascalCase or exactly as defined)
     protected $table = 'Course';

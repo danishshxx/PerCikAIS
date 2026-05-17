@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $table = 'User';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false;
     const CREATED_AT = 'createdAt';
     const UPDATED_AT = 'updatedAt';
 
