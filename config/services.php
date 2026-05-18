@@ -44,4 +44,9 @@ return [
     'lms' => [
     'enabled' => env('LMS_INTEGRATION', false),
     ],
+
+    'rust_backend' => [
+    'url' => env('RUST_BACKEND_URL', 'http://127.0.0.1:3000'),
+    'timeout' => env('RUST_BACKEND_TIMEOUT', 5),
+    ],
 ];

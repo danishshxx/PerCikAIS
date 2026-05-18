@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Invoice;
 use App\Models\Attendance;
+use App\Models\LmsCourse;
+use App\Models\LmsUser;
+use Illuminate\Support\Str;
 
 
 class AdminController extends Controller
@@ -121,5 +124,115 @@ class AdminController extends Controller
         ]);
 
         return redirect()->route('admin.finance')->with('success', 'Tagihan berhasil dikirim ke siswa!');
+    }
+
+    public function subjects()
+    {
+        try {
+            $courses = LmsCourse::with('teacher')
+                ->orderBy('createdAt', 'desc')
+                ->get();
+
+            $teachers = LmsUser::query()
+                ->whereRaw('UPPER(role) = ?', ['TEACHER'])
+                ->orderBy('name')
+                ->get();
+
+            $lmsConnected = true;
+            $lmsError = null;
+        } catch (\Throwable $e) {
+            $courses = collect();
+            $teachers = collect();
+            $lmsConnected = false;
+            $lmsError = $e->getMessage();
+        }
+
+        return view('admin.subjects', compact(
+            'courses',
+            'teachers',
+            'lmsConnected',
+            'lmsError'
+        ));
+    }
+
+    public function storeSubject(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'thumbnail' => ['nullable', 'string', 'max:1000'],
+            'teacherId' => ['required', 'string', 'max:255'],
+        ], [
+            'title.required' => 'Nama mata pelajaran wajib diisi.',
+            'teacherId.required' => 'Guru pengampu wajib dipilih.',
+        ]);
+
+        try {
+            LmsCourse::create([
+                'id' => 'c' . substr(str_replace('-', '', Str::uuid()->toString()), 0, 24),
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'thumbnail' => $validated['thumbnail'] ?? null,
+                'teacherId' => $validated['teacherId'],
+                'createdAt' => now(),
+            ]);
+
+            return redirect()
+                ->route('admin.subjects')
+                ->with('success', 'Mata pelajaran berhasil ditambahkan.');
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.subjects')
+                ->with('error', 'Gagal menambahkan mata pelajaran: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function updateSubject(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'thumbnail' => ['nullable', 'string', 'max:1000'],
+            'teacherId' => ['required', 'string', 'max:255'],
+        ], [
+            'title.required' => 'Nama mata pelajaran wajib diisi.',
+            'teacherId.required' => 'Guru pengampu wajib dipilih.',
+        ]);
+
+        try {
+            $course = LmsCourse::findOrFail($id);
+
+            $course->update([
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'thumbnail' => $validated['thumbnail'] ?? null,
+                'teacherId' => $validated['teacherId'],
+            ]);
+
+            return redirect()
+                ->route('admin.subjects')
+                ->with('success', 'Mata pelajaran berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.subjects')
+                ->with('error', 'Gagal memperbarui mata pelajaran: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteSubject(string $id)
+    {
+        try {
+            $course = LmsCourse::findOrFail($id);
+            $course->delete();
+
+            return redirect()
+                ->route('admin.subjects')
+                ->with('success', 'Mata pelajaran berhasil dihapus.');
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.subjects')
+                ->with('error', 'Gagal menghapus mata pelajaran. Kemungkinan masih dipakai di enrollment, jadwal, quiz, assignment, atau data LMS lain.');
+        }
     }
 }

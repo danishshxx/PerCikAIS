@@ -11,13 +11,27 @@ class LmsCourse extends Model
 
     protected $connection = 'mysql_lms';
 
-    public $timestamps = false;
-
     protected $table = 'Course';
 
     protected $primaryKey = 'id';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
-    protected $guarded = [];
+    public $timestamps = false;
+
+    protected $fillable = [
+        'id',
+        'title',
+        'description',
+        'thumbnail',
+        'teacherId',
+        'createdAt',
+    ];
+
+    public function teacher()
+    {
+        return $this->belongsTo(LmsUser::class, 'teacherId', 'id');
+    }
 }

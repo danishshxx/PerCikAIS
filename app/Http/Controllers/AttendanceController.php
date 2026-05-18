@@ -2,53 +2,64 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Attendance;
-use Illuminate\Support\Facades\Auth;
 use App\Models\LmsCourse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class AttendanceController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-        $hasUnpaid = $user->hasUnpaidInvoices();
 
         $history = Attendance::where('user_id', $user->id)
             ->orderBy('attendance_date', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        $totalPertemuan = $history->where('is_verified', true)->count();
+        $verifiedHistory = $history->where('is_verified', true);
 
-        $totalHadir = $history
-            ->where('is_verified', true)
-            ->filter(fn ($a) => strtolower($a->status) === 'hadir')
+        $totalPertemuan = $verifiedHistory->count();
+
+        $totalHadir = $verifiedHistory
+            ->filter(fn ($attendance) => strtolower($attendance->status) === 'hadir')
             ->count();
 
-        $totalSakitIzin = $history
-            ->where('is_verified', true)
-            ->filter(fn ($a) => in_array(strtolower($a->status), ['sakit', 'izin']))
+        $totalSakitIzin = $verifiedHistory
+            ->filter(fn ($attendance) => in_array(strtolower($attendance->status), ['sakit', 'izin']))
             ->count();
 
-        $totalAlpa = $history
-            ->where('is_verified', true)
-            ->filter(fn ($a) => strtolower($a->status) === 'alpa')
+        $totalAlpa = $verifiedHistory
+            ->filter(fn ($attendance) => strtolower($attendance->status) === 'alpa')
             ->count();
 
         $persentase = $totalPertemuan > 0
             ? round(($totalHadir / $totalPertemuan) * 100)
             : 0;
 
-        $lmsCourses = $this->getSafeLmsCourses();
+        $pendingRequests = $history
+            ->where('is_verified', false)
+            ->whereIn('status', ['Sakit', 'Izin'])
+            ->count();
 
-        return view('attendance.index', compact(
+        $hasUnpaid = method_exists($user, 'hasUnpaidInvoices')
+            ? $user->hasUnpaidInvoices()
+            : false;
+
+        $lmsCourses = $this->getLmsCourses();
+
+        return view('student.attendance.index', compact(
             'history',
             'totalPertemuan',
             'totalHadir',
             'totalSakitIzin',
             'totalAlpa',
             'persentase',
+            'pendingRequests',
             'hasUnpaid',
             'lmsCourses'
         ));
@@ -58,115 +69,99 @@ class AttendanceController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasUnpaidInvoices()) {
-            return redirect()
-                ->back()
-                ->with('error_pay', 'Kamu tidak bisa melakukan presensi. Harap lunas SPP/Tagihan terlebih dahulu!');
+        $validated = $request->validate([
+            'course_id' => ['nullable', 'string', 'max:255'],
+            'subject_name' => ['required_without:course_id', 'nullable', 'string', 'max:255'],
+            'attendance_date' => ['required', 'date', 'before_or_equal:today'],
+            'status' => ['required', 'in:Sakit,Izin'],
+            'absence_reason' => ['nullable', 'string', 'max:1000'],
+            'absence_letter' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:2048'],
+        ], [
+            'subject_name.required_without' => 'Mata pelajaran wajib diisi.',
+            'attendance_date.required' => 'Tanggal berhalangan wajib diisi.',
+            'attendance_date.before_or_equal' => 'Tanggal tidak boleh melebihi hari ini.',
+            'status.required' => 'Jenis berhalangan wajib dipilih.',
+            'status.in' => 'Siswa hanya bisa mengajukan Sakit atau Izin.',
+            'absence_letter.required' => 'Surat atau bukti berhalangan wajib diupload.',
+            'absence_letter.mimes' => 'Format surat harus PDF, JPG, JPEG, PNG, atau WEBP.',
+            'absence_letter.max' => 'Ukuran surat maksimal 2MB.',
+        ]);
+
+        $courseId = $validated['course_id'] ?? null;
+        $subjectName = $this->resolveSubjectName($courseId, $validated['subject_name'] ?? null);
+
+        $duplicateQuery = Attendance::where('user_id', $user->id)
+            ->whereDate('attendance_date', $validated['attendance_date'])
+            ->where('subject_name', $subjectName);
+
+        if (Schema::hasColumn('attendances', 'course_id') && $courseId) {
+            $duplicateQuery->where('course_id', $courseId);
         }
 
-        $request->validate([
-            'course_id' => 'required|string',
-            'status' => 'required|in:Hadir,Izin',
-        ]);
+        if ($duplicateQuery->exists()) {
+            return redirect()
+                ->route('attendance.index')
+                ->with('error', 'Pengajuan untuk mata pelajaran dan tanggal tersebut sudah pernah dibuat.');
+        }
 
-        $subjectName = $this->getSafeCourseName($request->course_id);
+        $letterPath = $request->file('absence_letter')
+            ->store('absence-letters', 'public');
 
-        $isVerified = $request->status === 'Hadir';
-
-        Attendance::create([
+        $payload = [
             'user_id' => $user->id,
-            'course_id' => $request->course_id,
             'subject_name' => $subjectName,
-            'attendance_date' => date('Y-m-d'),
-            'status' => $request->status,
-            'is_verified' => $isVerified,
-        ]);
+            'attendance_date' => $validated['attendance_date'],
+            'status' => $validated['status'],
+            'is_verified' => false,
+        ];
 
-        $msg = $isVerified
-            ? 'Presensi berhasil dicatat!'
-            : 'Permohonan izin berhasil dikirim! Menunggu verifikasi Guru.';
+        if (Schema::hasColumn('attendances', 'course_id')) {
+            $payload['course_id'] = $courseId;
+        }
+
+        if (Schema::hasColumn('attendances', 'absence_letter_path')) {
+            $payload['absence_letter_path'] = $letterPath;
+        }
+
+        if (Schema::hasColumn('attendances', 'absence_reason')) {
+            $payload['absence_reason'] = $validated['absence_reason'] ?? null;
+        }
+
+        Attendance::create($payload);
 
         return redirect()
             ->route('attendance.index')
-            ->with('success', $msg);
+            ->with('success', 'Pengajuan berhalangan berhasil dikirim. Menunggu verifikasi guru.');
     }
 
-    private function getSafeLmsCourses(): Collection
+    private function resolveSubjectName(?string $courseId, ?string $subjectName): string
     {
-        try {
-            return LmsCourse::orderBy('createdAt', 'desc')->get();
-        } catch (\Throwable $e) {
-            return collect([
-                (object) [
-                    'id' => 'dummy-tik',
-                    'title' => 'Teknologi Informasi & Komunikasi',
-                    'name' => 'Teknologi Informasi & Komunikasi',
-                    'description' => 'Data sementara untuk kebutuhan perapihan UI.',
-                    'createdAt' => now(),
-                ],
-                (object) [
-                    'id' => 'dummy-matematika',
-                    'title' => 'Matematika',
-                    'name' => 'Matematika',
-                    'description' => 'Data sementara untuk kebutuhan perapihan UI.',
-                    'createdAt' => now()->subDay(),
-                ],
-                (object) [
-                    'id' => 'dummy-bahasa-indonesia',
-                    'title' => 'Bahasa Indonesia',
-                    'name' => 'Bahasa Indonesia',
-                    'description' => 'Data sementara untuk kebutuhan perapihan UI.',
-                    'createdAt' => now()->subDays(2),
-                ],
-            ]);
-        }
-    }
-
-    private function getSafeCourseName(string $courseId): string
-    {
-        $dummyCourses = $this->getDummyCourses();
-
-        $dummyCourse = $dummyCourses->firstWhere('id', $courseId);
-
-        if ($dummyCourse) {
-            return $dummyCourse->title;
+        if (! $courseId) {
+            return $subjectName ?: 'Mata Pelajaran Tidak Diketahui';
         }
 
         try {
             $course = LmsCourse::find($courseId);
 
-            return $course?->title
-                ?? $course?->name
-                ?? 'Mata Pelajaran Tidak Diketahui';
+            if ($course) {
+                return $course->title
+                    ?? $course->name
+                    ?? $course->subject_name
+                    ?? 'Mata Pelajaran Tidak Diketahui';
+            }
         } catch (\Throwable $e) {
-            return 'Mata Pelajaran Sementara';
+            //
         }
+
+        return $subjectName ?: 'Mata Pelajaran Tidak Diketahui';
     }
 
-    private function getDummyCourses(): Collection
+    private function getLmsCourses(): Collection
     {
-        return collect([
-            (object) [
-                'id' => 'dummy-tik',
-                'title' => 'Teknologi Informasi & Komunikasi',
-                'name' => 'Teknologi Informasi & Komunikasi',
-                'description' => 'Data sementara untuk kebutuhan perapihan UI.',
-                'createdAt' => now(),
-            ],
-            (object) [
-                'id' => 'dummy-matematika',
-                'title' => 'Matematika',
-                'name' => 'Matematika',
-                'description' => 'Data sementara untuk kebutuhan perapihan UI.',
-                'createdAt' => now()->subDay(),
-            ],
-            (object) [
-                'id' => 'dummy-bahasa-indonesia',
-                'title' => 'Bahasa Indonesia',
-                'name' => 'Bahasa Indonesia',
-                'description' => 'Data sementara untuk kebutuhan perapihan UI.',
-                'createdAt' => now()->subDays(2),
-            ],
-        ]);
+        try {
+            return LmsCourse::orderBy('createdAt', 'desc')->get();
+        } catch (\Throwable $e) {
+            return collect();
+        }
     }
 }

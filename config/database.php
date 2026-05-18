@@ -146,7 +146,7 @@ return [
         'prefix_indexes' => true,
         'strict' => true,
         'engine' => null,
-],
+        ],
 
     ],
 

@@ -2,75 +2,217 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
+use App\Services\RustBackendService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
 {
-    // Arahin user ke halaman login Google
-    public function redirect()
+    public function redirect(): RedirectResponse
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with([
+                'prompt' => 'select_account',
+            ])
+            ->redirect();
     }
 
-    // Nangkap kembalian dari Google
-    public function callback()
+    public function callback(RustBackendService $rustBackend): RedirectResponse
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')
+                ->stateless()
+                ->user();
 
-            // KARENA KITA CUMA FE: Kita cuma bertugas "Membaca" (Read), bukan "Membuat" (Create)
-            $user = User::where('email', $googleUser->getEmail())->first();
+            $email = strtolower(trim($googleUser->getEmail()));
 
-            // dd($user->role, $user->email);
+            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
-            if ($user) {
-                // Lolos masuk sistem
-                Auth::login($user);
-
-                // Arahkan sesuai role
-                if ($user->isAdmin()) return redirect()->route('admin.dashboard'); 
-                if ($user->isTeacher()) return redirect()->route('teacher.dashboard');
-                
-                return redirect()->route('dashboard'); 
-            } else {
-                // Email belum didaftarin sama Admin / Backend
-                return redirect('/login')->with('error', 'Akses ditolak! Email Anda belum terdaftar di SIAKAd Cikini. Silakan hubungi Administrator.');
+            if (! $user) {
+                return redirect()
+                    ->route('login')
+                    ->with('error', 'Akses ditolak. Email kamu belum terdaftar di sistem sekolah. Silakan hubungi Administrator.');
             }
 
-        } catch (\Exception $e) {
-            dd($e->getMessage()); 
+            Auth::login($user, true);
+
+            $request = request();
+            $request->session()->regenerate();
+
+            $this->storeRustTokenIfAvailable($googleUser, $rustBackend);
+            $this->recordLoginLog($user, $request);
+
+            return redirect()->intended($this->redirectPathByRole($user));
+        } catch (\Throwable $e) {
+            Log::error('Google login failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('login')
+                ->with('error', 'Login Google gagal. Silakan coba lagi atau hubungi Administrator.');
         }
     }
 
-    // Login via Scanner QR (Tetep dibiarin buat fitur bypass)
-    public function qrLoginCallback(Request $request)
+    public function qrLoginCallback(Request $request): JsonResponse
     {
         try {
             $qrJwt = $request->input('qrJwt');
-            if (!$qrJwt) return response()->json(['error' => 'No QR token provided'], 400);
 
-            $parts = explode('.', $qrJwt);
-            if (count($parts) < 2) return response()->json(['error' => 'Invalid token'], 400);
-            
-            $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $parts[1])));
-            if (!$payload || !isset($payload->sub)) return response()->json(['error' => 'Invalid token payload'], 400);
+            if (! $qrJwt) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'No QR token provided',
+                ], 400);
+            }
 
-            $user = User::where('email', $payload->sub)->first();
-            if (!$user) return response()->json(['error' => 'User not found in database'], 404);
+            $payload = $this->decodeJwtPayload($qrJwt);
 
-            Auth::login($user);
+            if (! $payload || ! isset($payload->sub)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid token payload',
+                ], 400);
+            }
 
-            $redirectUrl = route('dashboard');
-            if ($user->isAdmin()) $redirectUrl = route('admin.dashboard');
-            else if ($user->isTeacher()) $redirectUrl = route('teacher.dashboard');
+            $email = strtolower(trim($payload->sub));
 
-            return response()->json(['success' => true, 'redirect' => $redirectUrl]);
+            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            if (! $user) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'User not found in database',
+                ], 404);
+            }
+
+            Auth::login($user, true);
+
+            $request->session()->regenerate();
+
+            session(['rust_token' => $qrJwt]);
+
+            $this->recordLoginLog($user, $request);
+
+            return response()->json([
+                'success' => true,
+                'redirect' => $this->redirectPathByRole($user),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('QR login failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'QR login gagal.',
+            ], 500);
+        }
+    }
+
+    private function redirectPathByRole(User $user): string
+    {
+        if ($user->isAdmin()) {
+            return route('admin.dashboard');
+        }
+
+        if ($user->isTeacher()) {
+            return route('teacher.dashboard');
+        }
+
+        return route('student.dashboard');
+    }
+
+    private function storeRustTokenIfAvailable(object $googleUser, RustBackendService $rustBackend): void
+    {
+        $idToken = $this->extractGoogleIdToken($googleUser);
+
+        if (! $idToken) {
+            session()->forget('rust_token');
+
+            Log::info('Google id_token not available, Rust protected API token skipped.');
+
+            return;
+        }
+
+        $rustToken = $rustBackend->googleLogin($idToken);
+
+        if ($rustToken) {
+            session(['rust_token' => $rustToken]);
+
+            return;
+        }
+
+        session()->forget('rust_token');
+    }
+
+    private function extractGoogleIdToken(object $googleUser): ?string
+    {
+        $possibleSources = [
+            data_get($googleUser, 'accessTokenResponseBody.id_token'),
+            data_get($googleUser, 'user.id_token'),
+            data_get($googleUser, 'id_token'),
+        ];
+
+        foreach ($possibleSources as $token) {
+            if (is_string($token) && trim($token) !== '') {
+                return $token;
+            }
+        }
+
+        return null;
+    }
+
+    private function decodeJwtPayload(string $jwt): ?object
+    {
+        $parts = explode('.', $jwt);
+
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        $payload = $parts[1];
+
+        $payload = str_replace(['-', '_'], ['+', '/'], $payload);
+        $payload .= str_repeat('=', (4 - strlen($payload) % 4) % 4);
+
+        $decoded = base64_decode($payload, true);
+
+        if ($decoded === false) {
+            return null;
+        }
+
+        $json = json_decode($decoded);
+
+        return is_object($json) ? $json : null;
+    }
+
+    private function recordLoginLog(User $user, Request $request): void
+    {
+        try {
+            if (! Schema::hasTable('login_logs')) {
+                return;
+            }
+
+            DB::table('login_logs')->insert([
+                'email' => $user->email,
+                'name' => $user->name,
+                'role' => $user->role ?? 'student',
+                'ip_address' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 1000),
+                'login_at' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Failed to record login log', [
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 }

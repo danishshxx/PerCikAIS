@@ -36,7 +36,7 @@ class FinanceController extends Controller
         $invoices = Invoice::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
         $totalPending = $invoices->where('status', 'pending')->sum('amount');
 
-        return view('finance.index', compact('invoices', 'totalPending'));
+        return view('student.finance.index', compact('invoices', 'totalPending'));
     }
 
     private function updateInvoiceStatus($invoice, $transaction, $fraud)
@@ -119,7 +119,7 @@ class FinanceController extends Controller
             return redirect('/finance')->with('error', 'Tagihan belum lunas.');
         }
 
-        return view('finance.receipt', compact('invoice'));
+        return view('student.finance.receipt', compact('invoice'));
     }
 
     public function downloadPDF($id)

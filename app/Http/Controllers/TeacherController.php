@@ -32,53 +32,36 @@ class TeacherController extends Controller
 
     public function storeAttendance(Request $request)
     {
-        $request->validate([
-            'subject_name' => 'required|string|max:255',
-            'attendance' => 'required|array',
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'subject_name' => ['required', 'string', 'max:255'],
+            'attendance_date' => ['required', 'date'],
+            'status' => ['required', 'in:Hadir,Sakit,Izin,Alpa'],
         ]);
 
-        $subject = $request->subject_name;
-        $date = date('Y-m-d');
-        $savedCount = 0;
-        $failedCount = 0;
+        Attendance::create([
+            'user_id' => $validated['user_id'],
+            'subject_name' => $validated['subject_name'],
+            'attendance_date' => $validated['attendance_date'],
+            'status' => $validated['status'],
+            'is_verified' => true,
+        ]);
 
-        foreach ($request->attendance as $userId => $status) {
-            $student = User::find($userId);
-            
-            if ($student && $student->hasUnpaidInvoices()) {
-                $failedCount++;
-                continue; 
-            }
-
-            // Input Guru otomatis verified = true
-            Attendance::updateOrCreate(
-                [
-                    'user_id' => $userId,
-                    'subject_name' => $subject,
-                    'attendance_date' => $date,
-                ],
-                [
-                    'status' => $status,
-                    'is_verified' => true
-                ]
-            );
-            $savedCount++;
-        }
-
-        $msg = "Berhasil menyimpan $savedCount data presensi.";
-        if ($failedCount > 0) {
-            $msg .= " ($failedCount murid memiliki tunggakan).";
-        }
-
-        return redirect()->route('teacher.attendance')->with('success', $msg);
+        return redirect()
+            ->route('teacher.attendance')
+            ->with('success', 'Absensi siswa berhasil dicatat.');
     }
 
     public function verifyAttendance($id)
     {
         $attendance = Attendance::findOrFail($id);
-        $attendance->is_verified = true;
-        $attendance->save();
 
-        return redirect()->route('teacher.attendance')->with('success', 'Permohonan izin ' . $attendance->user->name . ' telah disetujui.');
+        $attendance->update([
+            'is_verified' => true,
+        ]);
+
+        return redirect()
+            ->route('teacher.attendance')
+            ->with('success', 'Pengajuan berhalangan berhasil diverifikasi.');
     }
 }
