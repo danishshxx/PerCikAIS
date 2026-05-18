@@ -102,11 +102,17 @@
                         >
                             <option value="">Pilih guru</option>
                             @foreach ($teachers as $teacher)
-                                <option value="{{ $teacher->id }}" @selected(old('teacherId') == $teacher->id)>
+                                <option value="{{ $teacher->rust_user_id }}" @selected(old('teacherId') == $teacher->rust_user_id)>
                                     {{ $teacher->name }} — {{ $teacher->email }}
                                 </option>
                             @endforeach
                         </select>
+
+                        @if (($unsyncedTeachers ?? 0) > 0)
+                            <p class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-300">
+                                Ada {{ $unsyncedTeachers }} guru yang belum tersinkron ke LMS. Jalankan php artisan lms:sync-users --role=teacher.
+                            </p>
+                        @endif
 
                         @if ($teachers->isEmpty())
                             <p class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-300">

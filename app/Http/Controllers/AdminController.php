@@ -9,6 +9,7 @@ use App\Models\Attendance;
 use App\Models\LmsCourse;
 use App\Models\LmsUser;
 use Illuminate\Support\Str;
+use App\Services\LmsUserSyncService;
 
 
 class AdminController extends Controller
@@ -37,38 +38,31 @@ class AdminController extends Controller
 
     public function storeTeacher(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-        ]);
-
-        User::create([
+        $teacher = User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'email' => strtolower(trim($request->email)),
             'password' => bcrypt('gurupercik123'),
             'role' => 'teacher',
         ]);
 
-        return redirect()->route('admin.teachers')->with('success', 'Akun Guru berhasil didaftarkan!');
+        app(LmsUserSyncService::class)->sync($teacher);
+
+        return redirect()->route('admin.teachers')->with('success', 'Akun guru berhasil didaftarkan dan disinkronkan ke LMS.');
     }
 
     // Fungsi buat Simpan Data Siswa Baru
     public function storeStudent(Request $request)
     {
-        // Validasi biar email ga boleh kembar
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-        ]);
+        $student = User::create([
+                'name' => $request->name,
+                'email' => strtolower(trim($request->email)),
+                'password' => bcrypt('percik123'),
+                'role' => 'student',
+            ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt('percik123'), // Password dummy aja karena nanti login via Google
-            'role' => 'student',
-        ]);
+            app(LmsUserSyncService::class)->sync($student);
 
-        return redirect()->route('admin.students')->with('success', 'Data siswa berhasil didaftarkan!');
+        return redirect()->route('admin.students')->with('success', 'Data siswa berhasil didaftarkan dan disinkronkan ke LMS.');
     }
 
     public function attendance()
@@ -129,20 +123,25 @@ class AdminController extends Controller
     public function subjects()
     {
         try {
-            $courses = LmsCourse::with('teacher')
+            $courses = \App\Models\LmsCourse::with('teacher')
                 ->orderBy('createdAt', 'desc')
                 ->get();
 
-            $teachers = LmsUser::query()
-                ->whereRaw('UPPER(role) = ?', ['TEACHER'])
+            $teachers = User::whereRaw('LOWER(role) = ?', ['teacher'])
+                ->whereNotNull('rust_user_id')
                 ->orderBy('name')
                 ->get();
+
+            $unsyncedTeachers = User::whereRaw('LOWER(role) = ?', ['teacher'])
+                ->whereNull('rust_user_id')
+                ->count();
 
             $lmsConnected = true;
             $lmsError = null;
         } catch (\Throwable $e) {
             $courses = collect();
             $teachers = collect();
+            $unsyncedTeachers = 0;
             $lmsConnected = false;
             $lmsError = $e->getMessage();
         }
@@ -150,6 +149,7 @@ class AdminController extends Controller
         return view('admin.subjects', compact(
             'courses',
             'teachers',
+            'unsyncedTeachers',
             'lmsConnected',
             'lmsError'
         ));

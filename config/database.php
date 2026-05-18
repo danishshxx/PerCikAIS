@@ -134,11 +134,12 @@ return [
 
         'mysql_lms' => [
         'driver' => 'mysql',
-        'host' => env('LMS_DB_HOST', '127.0.0.1'),
-        'port' => env('LMS_DB_PORT', '3306'),
-        'database' => env('LMS_DB_DATABASE', 'forge'),
-        'username' => env('LMS_DB_USERNAME', 'forge'),
-        'password' => env('LMS_DB_PASSWORD', ''),
+        'url' => env('LMS_DATABASE_URL'),
+        'host' => env('LMS_DB_HOST', env('DB_HOST', '127.0.0.1')),
+        'port' => env('LMS_DB_PORT', env('DB_PORT', '3306')),
+        'database' => env('LMS_DB_DATABASE', env('DB_DATABASE')),
+        'username' => env('LMS_DB_USERNAME', env('DB_USERNAME', 'root')),
+        'password' => env('LMS_DB_PASSWORD', env('DB_PASSWORD', '')),
         'unix_socket' => env('DB_SOCKET', ''),
         'charset' => env('DB_CHARSET', 'utf8mb4'),
         'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
@@ -146,7 +147,7 @@ return [
         'prefix_indexes' => true,
         'strict' => true,
         'engine' => null,
-        ],
+    ],
 
     ],
 

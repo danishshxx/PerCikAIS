@@ -17,11 +17,4 @@ class LmsUser extends Model
     protected $keyType = 'string';
 
     public $timestamps = false;
-
-    protected $fillable = [
-        'id',
-        'name',
-        'email',
-        'role',
-    ];
 }
