@@ -104,17 +104,17 @@ Route::middleware(['auth', 'verified', 'teacher'])
     ->prefix('teacher')
     ->name('teacher.')
     ->group(function () {
-        Route::get('/dashboard', [TeacherController::class, 'dashboard'])
-            ->name('dashboard');
+        Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
 
-        Route::get('/attendance', [TeacherController::class, 'attendance'])
-            ->name('attendance');
+        Route::view('/settings', 'teacher.settings.index')->name('settings');
 
-        Route::post('/attendance/store', [TeacherController::class, 'storeAttendance'])
-            ->name('attendance.store');
+        Route::get('/attendance', [TeacherController::class, 'attendance'])->name('attendance');
+        Route::post('/attendance/store', [TeacherController::class, 'storeAttendance'])->name('attendance.store');
+        Route::post('/attendance/verify/{id}', [TeacherController::class, 'verifyAttendance'])->name('attendance.verify');
 
-        Route::post('/attendance/verify/{id}', [TeacherController::class, 'verifyAttendance'])
-            ->name('attendance.verify');
+        Route::get('/enrollments', [TeacherController::class, 'enrollments'])->name('enrollments');
+        Route::post('/enrollments', [TeacherController::class, 'storeEnrollment'])->name('enrollments.store');
+        Route::delete('/enrollments/{courseId}/{studentRustId}', [TeacherController::class, 'deleteEnrollment'])->name('enrollments.delete');
     });
 
 /*

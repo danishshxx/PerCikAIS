@@ -20,5 +20,18 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (PostTooLargeException $e, Request $request) {
+            $maxPostSize = ini_get('post_max_size') ?: 'ukuran yang diizinkan server';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'File yang diupload terlalu besar.',
+                    'detail' => 'Maksimal ukuran request server saat ini adalah ' . $maxPostSize . '.',
+                ], 413);
+            }
+
+            return redirect()
+                ->back()
+                ->with('error', 'File yang diupload terlalu besar. Maksimal ukuran request server saat ini adalah ' . $maxPostSize . '. Silakan pilih gambar yang lebih kecil atau kompres gambar terlebih dahulu.');
+        });
     })->create();

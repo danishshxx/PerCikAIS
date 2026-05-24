@@ -160,7 +160,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'thumbnail' => ['nullable', 'string', 'max:1000'],
+            'thumbnail_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'teacherId' => ['required', 'string', 'max:255'],
         ], [
             'title.required' => 'Nama mata pelajaran wajib diisi.',
@@ -193,20 +193,37 @@ class AdminController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'thumbnail' => ['nullable', 'string', 'max:1000'],
+            'thumbnail_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_thumbnail' => ['nullable', 'boolean'],
             'teacherId' => ['required', 'string', 'max:255'],
         ], [
             'title.required' => 'Nama mata pelajaran wajib diisi.',
             'teacherId.required' => 'Guru pengampu wajib dipilih.',
+            'thumbnail_file.mimes' => 'Thumbnail harus berupa JPG, JPEG, PNG, atau WEBP.',
+            'thumbnail_file.max' => 'Ukuran thumbnail maksimal 5MB.',
         ]);
 
         try {
             $course = LmsCourse::findOrFail($id);
 
+            $thumbnailUrl = $course->thumbnail;
+
+            if ($request->boolean('remove_thumbnail')) {
+                $this->deleteLocalCourseThumbnail($course->thumbnail);
+                $thumbnailUrl = null;
+            }
+
+            if ($request->hasFile('thumbnail_file')) {
+                $this->deleteLocalCourseThumbnail($course->thumbnail);
+
+                $path = $request->file('thumbnail_file')->store('course-thumbnails', 'public');
+                $thumbnailUrl = asset('storage/' . $path);
+            }
+
             $course->update([
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
-                'thumbnail' => $validated['thumbnail'] ?? null,
+                'thumbnail' => $thumbnailUrl,
                 'teacherId' => $validated['teacherId'],
             ]);
 
@@ -233,6 +250,25 @@ class AdminController extends Controller
             return redirect()
                 ->route('admin.subjects')
                 ->with('error', 'Gagal menghapus mata pelajaran. Kemungkinan masih dipakai di enrollment, jadwal, quiz, assignment, atau data LMS lain.');
+        }
+    }
+
+    private function deleteLocalCourseThumbnail(?string $thumbnailUrl): void
+    {
+        if (! $thumbnailUrl) {
+            return;
+        }
+
+        $storageMarker = '/storage/';
+
+        if (! str_contains($thumbnailUrl, $storageMarker)) {
+            return;
+        }
+
+        $relativePath = Str::after($thumbnailUrl, $storageMarker);
+
+        if ($relativePath && Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->delete($relativePath);
         }
     }
 }

@@ -1,33 +1,87 @@
 <x-layouts.teacher-percikais>
-    <x-slot name="title">Dashboard Guru - PerCikAIS</x-slot>
+    <x-slot name="title">Dashboard Guru</x-slot>
 
-    <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Panel Tenaga Pengajar</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Selamat datang kembali, mari kelola presensi murid hari ini.</p>
-    </div>
+    <section class="space-y-7">
+        <div class="overflow-hidden rounded-[28px] bg-[#111B2E] p-7 shadow-[0_22px_70px_rgba(15,23,42,0.18)] dark:bg-[#101827] md:p-8">
+            <div class="relative">
+                <div class="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl"></div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white dark:bg-[#0A0F1C] p-6 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1 uppercase tracking-wider">Total Murid Terdaftar</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $totalMurid }} <span class="text-sm font-normal text-gray-400">Siswa</span></h3>
-        </div>
-        <div class="bg-white dark:bg-[#0A0F1C] p-6 rounded-3xl shadow-sm border border-gray-200 dark:border-gray-800 transition-colors">
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1 uppercase tracking-wider">Presensi Hari Ini</p>
-            <h3 class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $absensiHariIni }} <span class="text-sm font-normal text-gray-400">Tercatat</span></h3>
-        </div>
-    </div>
+                <div class="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-blue-100">
+                            Teacher Console
+                        </div>
 
-    <div class="bg-white dark:bg-[#0A0F1C] rounded-3xl p-8 border border-gray-200 dark:border-gray-800 shadow-sm text-center transition-colors">
-        <div class="w-24 h-24 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-12 h-12 text-green-600 dark:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                        <h1 class="text-2xl font-extrabold tracking-tight text-white md:text-3xl">
+                            Dashboard Guru PerCikAIS
+                        </h1>
+
+                        <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+                            Kelola absensi, verifikasi izin/sakit siswa, dan enroll murid ke mata pelajaran yang kamu ampu.
+                        </p>
+                    </div>
+
+                    <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Hari ini</p>
+                        <p class="mt-2 text-sm font-extrabold text-white">
+                            {{ now()->translatedFormat('l, d F Y') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Manajemen Presensi</h2>
-        <p class="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto mb-8">
-            Pastikan setiap murid yang hadir telah tercatat dalam sistem. Kamu dapat menginput data presensi secara manual melalui menu Absensi Murid.
-        </p>
-        <a href="{{ route('teacher.attendance') }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-lg shadow-blue-600/20">
-            Buka Menu Absensi
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-        </a>
-    </div>
+
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524]">
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Mata Pelajaran</p>
+                <h3 class="mt-2 text-3xl font-extrabold text-slate-950 dark:text-white">{{ $totalCourses ?? 0 }}</h3>
+                <p class="mt-3 text-sm font-medium text-slate-400">Mapel yang diampu</p>
+            </div>
+
+            <div class="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524]">
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Murid Ter-enroll</p>
+                <h3 class="mt-2 text-3xl font-extrabold text-blue-600 dark:text-blue-300">{{ $totalEnrolledStudents ?? 0 }}</h3>
+                <p class="mt-3 text-sm font-medium text-slate-400">Siswa dalam mapel</p>
+            </div>
+
+            <div class="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524]">
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Absensi Hari Ini</p>
+                <h3 class="mt-2 text-3xl font-extrabold text-emerald-600 dark:text-emerald-300">{{ $totalTodayAttendances ?? 0 }}</h3>
+                <p class="mt-3 text-sm font-medium text-slate-400">Data tercatat</p>
+            </div>
+
+            <div class="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524]">
+                <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Menunggu Verifikasi</p>
+                <h3 class="mt-2 text-3xl font-extrabold text-amber-600 dark:text-amber-300">{{ $totalPendingRequests ?? 0 }}</h3>
+                <p class="mt-3 text-sm font-medium text-slate-400">Sakit / izin siswa</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div class="rounded-[28px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524] md:p-8 xl:col-span-2">
+                <h2 class="text-xl font-extrabold text-slate-950 dark:text-white">Akses Cepat Guru</h2>
+                <p class="mt-2 text-sm font-medium text-slate-400">Pilih fitur utama untuk mengelola kelas.</p>
+
+                <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <a href="{{ route('teacher.attendance') }}" class="rounded-3xl border border-slate-100 bg-slate-50 p-5 transition hover:-translate-y-0.5 hover:bg-blue-50 dark:border-slate-800 dark:bg-[#121929] dark:hover:bg-blue-500/10">
+                        <p class="text-base font-extrabold text-slate-950 dark:text-white">Absensi Siswa</p>
+                        <p class="mt-2 text-sm font-medium text-slate-400">Catat hadir, sakit, izin, dan alpa.</p>
+                    </a>
+
+                    <a href="{{ route('teacher.enrollments') }}" class="rounded-3xl border border-slate-100 bg-slate-50 p-5 transition hover:-translate-y-0.5 hover:bg-emerald-50 dark:border-slate-800 dark:bg-[#121929] dark:hover:bg-emerald-500/10">
+                        <p class="text-base font-extrabold text-slate-950 dark:text-white">Enroll Murid</p>
+                        <p class="mt-2 text-sm font-medium text-slate-400">Daftarkan murid ke mata pelajaran.</p>
+                    </a>
+                </div>
+            </div>
+
+            <div class="rounded-[28px] border border-slate-100 bg-white p-6 text-center shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524] md:p-8">
+                <img src="{{ auth()->user()->profile_photo_url }}" class="mx-auto h-24 w-24 rounded-[28px] object-cover shadow-xl shadow-blue-500/10">
+                <h2 class="mt-5 text-xl font-extrabold text-slate-950 dark:text-white">Selamat Mengajar!</h2>
+                <p class="mt-3 text-sm font-medium leading-6 text-slate-400">
+                    Gunakan panel ini untuk memastikan data kelas dan absensi tetap rapi.
+                </p>
+            </div>
+        </div>
+    </section>
 </x-layouts.teacher-percikais>
