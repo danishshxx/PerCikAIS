@@ -60,7 +60,7 @@ class TeacherController extends Controller
     public function storeAttendance(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => ['required', 'exists:User,id'],
             'course_id' => ['nullable', 'string', 'max:255'],
             'subject_name' => ['required_without:course_id', 'nullable', 'string', 'max:255'],
             'attendance_date' => ['required', 'date'],
@@ -137,9 +137,7 @@ class TeacherController extends Controller
             ->orderBy('name')
             ->get();
 
-        $unsyncedStudents = User::whereRaw('LOWER(role) = ?', ['student'])
-            ->whereNull('rust_user_id')
-            ->count();
+        $unsyncedStudents = 0;
 
         $enrollments = $this->teacherEnrollmentRows();
 
@@ -155,7 +153,7 @@ class TeacherController extends Controller
     {
         $validated = $request->validate([
             'course_id' => ['required', 'string', 'max:255'],
-            'student_id' => ['required', 'exists:users,id'],
+            'student_id' => ['required', 'exists:User,id'],
         ]);
 
         if (! $this->lmsEnrollmentReady()) {
@@ -169,12 +167,6 @@ class TeacherController extends Controller
         }
 
         $student = User::findOrFail($validated['student_id']);
-
-        if (! $student->rust_user_id) {
-            return redirect()
-                ->route('teacher.enrollments')
-                ->with('error', 'Murid belum tersinkron ke LMS. Jalankan php artisan lms:sync-users --role=student.');
-        }
 
         $exists = DB::connection('mysql_lms')
             ->table('Enrollment')

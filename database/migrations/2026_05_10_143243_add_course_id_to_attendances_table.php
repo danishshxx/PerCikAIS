@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->string('course_id')->nullable()->after('subject_name')->comment('ID Course dari LMS database');
+            if (!Schema::hasColumn('attendances', 'course_id')) {
+                $table->string('course_id')->nullable()->after('subject_name')->comment('ID Course dari LMS database');
+            }
         });
     }
 

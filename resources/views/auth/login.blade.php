@@ -39,23 +39,66 @@
             <p class="text-xs text-gray-500 mt-1 transition-colors duration-500">Gunakan email Google Workspace sekolah yang telah didaftarkan oleh admin.</p>
         </div>
 
-        <a href="{{ url('/auth/google') }}" 
-            onclick="document.getElementById('custom-loader').classList.remove('hidden'); document.getElementById('custom-loader').classList.add('flex');"
-            class="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center transition-colors mb-3">
-            Masuk dengan Google
-        </a>
+        <form method="POST" action="{{ route('login') }}" class="space-y-4">
+            @csrf
 
-        <div class="flex items-center gap-4 my-4">
-            <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
-            <span class="text-xs font-medium text-gray-400 uppercase tracking-widest">Atau</span>
-            <div class="h-px bg-gray-200 dark:bg-gray-700 flex-1"></div>
+            <!-- NIM / Email Input -->
+            <div>
+                <label for="login" class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">NIM / Email</label>
+                <input type="text" id="login" name="login" required placeholder="Masukkan NIM atau Email Anda" 
+                    value="{{ old('login') }}"
+                    class="w-full h-12 rounded-2xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-[#121929] px-4 text-sm font-semibold text-gray-800 dark:text-white outline-none transition focus:border-blue-500 focus:bg-white dark:focus:bg-[#121929] focus:ring-4 focus:ring-blue-500/10">
+                @error('login')
+                    <span class="text-xs text-red-500 font-semibold mt-1 block">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <!-- Password Input -->
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <label for="password" class="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Password</label>
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">Lupa Password?</a>
+                    @endif
+                </div>
+                <input type="password" id="password" name="password" required placeholder="••••••••" 
+                    class="w-full h-12 rounded-2xl border border-gray-200 dark:border-gray-850 bg-gray-50 dark:bg-[#121929] px-4 text-sm font-semibold text-gray-800 dark:text-white outline-none transition focus:border-blue-500 focus:bg-white dark:focus:bg-[#121929] focus:ring-4 focus:ring-blue-500/10">
+                @error('password')
+                    <span class="text-xs text-red-500 font-semibold mt-1 block">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center">
+                <input id="remember_me" type="checkbox" name="remember" class="rounded border-gray-300 dark:border-gray-700 text-blue-600 shadow-sm focus:ring-blue-500 dark:bg-gray-900">
+                <label for="remember_me" class="ml-2 text-xs font-semibold text-gray-500 dark:text-gray-400">Ingat saya di perangkat ini</label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" 
+                class="w-full h-12 text-white bg-blue-600 hover:bg-blue-700 font-bold rounded-2xl text-sm px-5 py-2.5 text-center flex items-center justify-center transition shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20">
+                Masuk ke Akun
+            </button>
+        </form>
+
+        <div class="flex items-center gap-4 my-6">
+            <div class="h-px bg-gray-200 dark:bg-gray-850 flex-1"></div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Atau masuk dengan</span>
+            <div class="h-px bg-gray-200 dark:bg-gray-850 flex-1"></div>
         </div>
 
-        <button type="button" onclick="openQrModal()"
-            class="w-full text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center transition-colors">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
-            Login dengan Kode QR
-        </button>
+        <div class="grid grid-cols-2 gap-3">
+            <a href="{{ url('/auth/google') }}" 
+                onclick="prosesLoginGoogle(event, '{{ url('/auth/google') }}')"
+                class="text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 font-bold rounded-2xl text-sm px-4 py-3 text-center flex items-center justify-center transition-colors">
+                Google
+            </a>
+
+            <button type="button" onclick="openQrModal()"
+                class="text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 font-bold rounded-2xl text-sm px-4 py-3 text-center flex items-center justify-center transition-colors">
+                Kode QR
+            </button>
+        </div>
 
         <p class="text-center text-xs text-gray-400 dark:text-gray-600 mt-8 transition-colors duration-500">Hubungi Administrator jika akun bermasalah.</p>
     </div>

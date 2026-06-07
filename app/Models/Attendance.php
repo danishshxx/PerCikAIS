@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Attendance extends Model
 {
@@ -11,9 +12,25 @@ class Attendance extends Model
 
     protected $guarded = []; // Buka gembok keamanan mass assignment
 
+    protected $casts = [
+        'attendance_date' => 'date',
+        'is_verified' => 'boolean',
+    ];
+
     // Relasi: Absen ini punya 1 siswa
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getAbsenceLetterUrlAttribute(): ?string
+    {
+        if (! $this->absence_letter_path) {
+            return null;
+        }
+
+        return Storage::disk('public')->exists($this->absence_letter_path)
+            ? '/storage/' . $this->absence_letter_path
+            : null;
     }
 }   

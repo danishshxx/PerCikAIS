@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::table('attendances', function (Blueprint $table) {
             // is_verified default true biar data lama & input guru angsung lunas/sah
-            $table->boolean('is_verified')->default(true)->after('status');
+            if (!Schema::hasColumn('attendances', 'is_verified')) {
+                $table->boolean('is_verified')->default(true)->after('status');
+            }
         });
     }
 

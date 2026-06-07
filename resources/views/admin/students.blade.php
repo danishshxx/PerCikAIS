@@ -2,7 +2,7 @@
     <x-slot name="title">Manajemen Murid - PerCikAIS</x-slot>
 
     @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 text-green-700 rounded-xl border border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20 font-medium text-sm transition-colors">
+        <div class="mb-6 p-4 bg-blue-50 text-blue-700 rounded-xl border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 font-medium text-sm transition-colors">
             ✅ {{ session('success') }}
         </div>
     @endif

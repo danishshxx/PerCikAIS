@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             '/finance/notification',
         ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\DetectMobile::class,
+        ]);
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
             'teacher' => \App\Http\Middleware\IsTeacher::class,

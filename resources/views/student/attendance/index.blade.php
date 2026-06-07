@@ -35,7 +35,7 @@
         </div>
 
         @if (session('success'))
-            <div class="rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+            <div class="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-sm font-semibold text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
                 {{ session('success') }}
             </div>
         @endif
@@ -68,7 +68,7 @@
 
             <div class="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524]">
                 <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Kehadiran</p>
-                <h3 class="mt-2 text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-300">
+                <h3 class="mt-2 text-3xl font-extrabold tracking-tight text-blue-600 dark:text-blue-300">
                     {{ $persentase }}%
                 </h3>
                 <p class="mt-3 text-sm font-medium text-slate-400">{{ $totalHadir }} kali hadir</p>

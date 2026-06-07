@@ -26,13 +26,13 @@ class AdminController extends Controller
 
     public function students()
     {
-        $students = User::where('role', 'student')->orderBy('created_at', 'desc')->get();
+        $students = User::where('role', 'student')->orderBy('createdAt', 'desc')->get();
         return view('admin.students', compact('students'));
     }
 
     public function teachers()
     {
-        $teachers = User::where('role', 'teacher')->orderBy('created_at', 'desc')->get();
+        $teachers = User::where('role', 'teacher')->orderBy('createdAt', 'desc')->get();
         return view('admin.teachers', compact('teachers'));
     }
 
@@ -128,13 +128,10 @@ class AdminController extends Controller
                 ->get();
 
             $teachers = User::whereRaw('LOWER(role) = ?', ['teacher'])
-                ->whereNotNull('rust_user_id')
                 ->orderBy('name')
                 ->get();
 
-            $unsyncedTeachers = User::whereRaw('LOWER(role) = ?', ['teacher'])
-                ->whereNull('rust_user_id')
-                ->count();
+            $unsyncedTeachers = 0;
 
             $lmsConnected = true;
             $lmsError = null;

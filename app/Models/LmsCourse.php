@@ -29,6 +29,6 @@ class LmsCourse extends Model
 
     public function teacher()
     {
-        return $this->belongsTo(LmsUser::class, 'teacherId', 'id');
+        return $this->belongsTo(User::class, 'teacherId', 'id');
     }
 }

@@ -2,7 +2,7 @@
     <x-slot name="title">Manajemen Guru - PerCikAIS</x-slot>
 
     @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 text-green-700 rounded-xl border border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20 font-medium text-sm transition-colors">
+        <div class="mb-6 p-4 bg-blue-50 text-blue-700 rounded-xl border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 font-medium text-sm transition-colors">
             ✅ {{ session('success') }}
         </div>
     @endif
@@ -39,7 +39,7 @@
                         <td class="p-4 text-gray-500 dark:text-gray-400">{{ $index + 1 }}</td>
                         <td class="p-4 font-semibold text-gray-900 dark:text-white">
                             <div class="flex items-center gap-3">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($teacher->name) }}&background=059669&color=fff&rounded=true" alt="Avatar" class="w-8 h-8 shadow-inner rounded-full">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($teacher->name) }}&background=2563eb&color=fff&rounded=true" alt="Avatar" class="w-8 h-8 shadow-inner rounded-full">
                                 <div class="flex flex-col">
                                     <span>{{ $teacher->name }}</span>
                                     <span class="text-[10px] text-gray-500 md:hidden">{{ $teacher->email }}</span>
@@ -48,7 +48,7 @@
                         </td>
                         <td class="p-4 text-gray-600 dark:text-gray-300 hidden md:table-cell">{{ $teacher->email }}</td>
                         <td class="p-4 hidden sm:table-cell">
-                            <span class="text-[10px] font-bold px-2 py-1 bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 rounded-md uppercase">Tenaga Pengajar</span>
+                            <span class="text-[10px] font-bold px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 rounded-md uppercase">Tenaga Pengajar</span>
                         </td>
                     </tr>
                     @empty

@@ -35,6 +35,11 @@ class GoogleAuthController extends Controller
 
             $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
+            // Auto-sync dari tabel LMS `user` jika belum ada di tabel Laravel `users`
+            if (! $user) {
+                $user = $this->syncFromLmsUser($email, $googleUser->getName());
+            }
+
             if (! $user) {
                 return redirect()
                     ->route('login')
@@ -85,6 +90,11 @@ class GoogleAuthController extends Controller
             $email = strtolower(trim($payload->sub));
 
             $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+            // Auto-sync dari tabel LMS `user` jika belum ada di tabel Laravel `users`
+            if (! $user) {
+                $user = $this->syncFromLmsUser($email, $payload->name ?? null);
+            }
 
             if (! $user) {
                 return response()->json([
@@ -192,6 +202,49 @@ class GoogleAuthController extends Controller
         $json = json_decode($decoded);
 
         return is_object($json) ? $json : null;
+    }
+
+    /**
+     * Cek apakah email ada di tabel LMS `user`, lalu auto-create di tabel Laravel `users`.
+     */
+    private function syncFromLmsUser(string $email, ?string $fallbackName = null): ?User
+    {
+        try {
+            $lmsUser = DB::table('user')
+                ->whereRaw('LOWER(email) = ?', [$email])
+                ->first();
+
+            if (! $lmsUser) {
+                return null;
+            }
+
+            $role = strtolower($lmsUser->role ?? 'student');
+            $name = $lmsUser->name ?? $fallbackName ?? 'User';
+
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+                'role' => $role,
+            ]);
+
+
+
+            Log::info('Auto-synced user from LMS table', [
+                'email' => $email,
+                'lms_user_id' => $lmsUser->id,
+                'role' => $role,
+            ]);
+
+            return $user;
+        } catch (\Throwable $e) {
+            Log::warning('Failed to auto-sync from LMS user table', [
+                'email' => $email,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     private function recordLoginLog(User $user, Request $request): void

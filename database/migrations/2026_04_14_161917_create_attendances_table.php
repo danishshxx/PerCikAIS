@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendances', function (Blueprint $table) {
-            $table->id();
-            // Sambungin ke tabel users (siswa)
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('subject_name');
-            $table->date('attendance_date');
-            $table->enum('status', ['Hadir', 'Sakit', 'Izin', 'Alpa']);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('attendances')) {
+            Schema::create('attendances', function (Blueprint $table) {
+                $table->id();
+                // Sambungin ke tabel users (siswa)
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->string('subject_name');
+                $table->date('attendance_date');
+                $table->enum('status', ['Hadir', 'Sakit', 'Izin', 'Alpa']);
+                $table->timestamps();
+            });
+        }
     }   
 
     /**

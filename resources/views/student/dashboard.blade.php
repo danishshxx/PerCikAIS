@@ -1,132 +1,198 @@
 <x-layouts.app-percikais>
-    <x-slot name="title">Beranda Siswa</x-slot>
+    <x-slot name="title">Beranda</x-slot>
 
-    <section class="mb-7 overflow-hidden rounded-[28px] bg-[#111B2E] p-7 shadow-[0_22px_70px_rgba(15,23,42,0.18)] dark:bg-[#101827] md:p-8">
-        <div class="relative">
-            <div class="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl"></div>
-            <div class="absolute bottom-0 right-28 h-24 w-24 rounded-full bg-cyan-400/10 blur-2xl"></div>
+    {{-- ═══════ Page Header (SnowUI style) ═══════ --}}
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Ikhtisar</h1>
+            <p class="text-[13px] text-slate-400 mt-1">Selamat datang, {{ auth()->user()->name }}!</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-[13px] text-slate-500 dark:text-slate-400">{{ now()->translatedFormat('l, d F Y') }}</span>
+        </div>
+    </div>
 
-            <div class="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+    {{-- ═══════ Stat Cards (SnowUI lavender style) ═══════ --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+        {{-- Presensi Semester --}}
+        <div class="bg-[#F0EBFF] dark:bg-violet-500/10 rounded-2xl p-5 relative overflow-hidden group">
+            <p class="text-[12px] font-medium text-violet-500 dark:text-violet-400 mb-1">Presensi Semester</p>
+            <div class="flex items-end gap-3">
+                <h3 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">95%</h3>
+                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 mb-1.5">
+                    +2.1%
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                </span>
+            </div>
+            {{-- Mini sparkline --}}
+            <svg class="absolute bottom-2 right-3 h-8 w-16 text-violet-400/30" viewBox="0 0 64 32" fill="none">
+                <path d="M2 28 L12 22 L22 24 L32 16 L42 18 L52 8 L62 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+        </div>
+
+        {{-- Mata Pelajaran --}}
+        <div class="bg-[#F0EBFF] dark:bg-violet-500/10 rounded-2xl p-5 relative overflow-hidden group">
+            <p class="text-[12px] font-medium text-violet-500 dark:text-violet-400 mb-1">Mata Pelajaran</p>
+            <div class="flex items-end gap-3">
+                <h3 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">12</h3>
+                <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1.5">
+                    Aktif
+                </span>
+            </div>
+            <svg class="absolute bottom-2 right-3 h-8 w-16 text-violet-400/30" viewBox="0 0 64 32" fill="none">
+                <path d="M2 20 L12 18 L22 20 L32 14 L42 16 L52 10 L62 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+        </div>
+
+        {{-- Status SPP --}}
+        <div class="bg-[#F0EBFF] dark:bg-violet-500/10 rounded-2xl p-5 relative overflow-hidden group">
+            <p class="text-[12px] font-medium text-violet-500 dark:text-violet-400 mb-1">Status SPP</p>
+            <div class="flex items-end gap-3">
+                <h3 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Lunas</h3>
+                <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 mb-1.5">
+                    ✓
+                </span>
+            </div>
+            <svg class="absolute bottom-2 right-3 h-8 w-16 text-violet-400/30" viewBox="0 0 64 32" fill="none">
+                <path d="M2 24 L12 20 L22 18 L32 22 L42 12 L52 8 L62 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+        </div>
+
+        {{-- Ruang Belajar --}}
+        <a href="https://perclms.hbii.my.id/" target="_blank" class="bg-[#F0EBFF] dark:bg-violet-500/10 rounded-2xl p-5 relative overflow-hidden group hover:bg-violet-100 dark:hover:bg-violet-500/20 transition cursor-pointer">
+            <p class="text-[12px] font-medium text-violet-500 dark:text-violet-400 mb-1">Ruang Belajar</p>
+            <div class="flex items-end gap-3">
+                <h3 class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Buka LMS →</h3>
+            </div>
+            <svg class="absolute bottom-2 right-3 h-8 w-16 text-violet-400/30" viewBox="0 0 64 32" fill="none">
+                <path d="M2 26 L12 24 L22 20 L32 24 L42 14 L52 10 L62 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </svg>
+        </a>
+    </div>
+
+    {{-- ═══════ Main Content Grid ═══════ --}}
+    <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        {{-- Jadwal Hari Ini (3 col span) --}}
+        <div class="xl:col-span-3 bg-white dark:bg-[#0F1524] border border-slate-200/70 dark:border-slate-800/50 rounded-2xl">
+            <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800/50">
                 <div>
-                    <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-blue-100">
-                        Portal Informasi Akademik
-                    </div>
-
-                    <h1 class="text-2xl font-extrabold tracking-tight text-white md:text-3xl">
-                        Halo, {{ auth()->user()->name }}!
-                    </h1>
-
-                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-                        Selamat datang di PerCikAIS. Pantau jadwal belajar, presensi, dan administrasi sekolah dari satu tempat.
-                    </p>
+                    <h2 class="text-[15px] font-bold text-slate-900 dark:text-white">Jadwal Hari Ini</h2>
+                    <p class="text-[12px] text-slate-400 mt-0.5">{{ now()->translatedFormat('l, d F Y') }}</p>
                 </div>
-
-                <a
-                    href="https://perclms.hbii.my.id/"
-                    target="_blank"
-                    class="inline-flex items-center justify-center gap-3 rounded-2xl bg-white px-5 py-3.5 text-sm font-bold text-blue-600 shadow-xl shadow-black/10 transition hover:-translate-y-0.5 hover:shadow-2xl dark:bg-[#0F1524] dark:text-blue-300"
-                >
-                    Buka Ruang Belajar LMS
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0-7 7m7-7H3" />
-                    </svg>
+                <a href="{{ route('attendance.index') }}" class="text-[12px] font-semibold text-violet-600 dark:text-violet-400 hover:underline">
+                    Lihat Semua →
                 </a>
             </div>
-        </div>
-    </section>
 
-    <section class="mb-7 grid grid-cols-1 gap-5 md:grid-cols-3">
-        <div class="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524]">
-            <div class="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-300">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 7V4m8 3V4M5 10h14M6.5 6h11A2.5 2.5 0 0 1 20 8.5v9A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-9A2.5 2.5 0 0 1 6.5 6Z" />
-                </svg>
+            <div class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                {{-- Schedule Item 1 --}}
+                <div class="flex items-center gap-5 px-6 py-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition">
+                    <div class="text-center w-14 shrink-0">
+                        <p class="text-[13px] font-bold text-slate-900 dark:text-white">08:00</p>
+                        <p class="text-[11px] text-slate-400">10:30</p>
+                    </div>
+                    <div class="h-10 w-1 rounded-full bg-violet-400"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[13px] font-semibold text-slate-800 dark:text-slate-100 truncate">Teknologi Informasi & Komunikasi</p>
+                        <p class="text-[12px] text-slate-400 mt-0.5">Ruang Lab Komputer B</p>
+                    </div>
+                    <span class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 shrink-0">Hadir</span>
+                </div>
+
+                {{-- Schedule Item 2 --}}
+                <div class="flex items-center gap-5 px-6 py-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition">
+                    <div class="text-center w-14 shrink-0">
+                        <p class="text-[13px] font-bold text-slate-900 dark:text-white">10:45</p>
+                        <p class="text-[11px] text-slate-400">12:15</p>
+                    </div>
+                    <div class="h-10 w-1 rounded-full bg-blue-400"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[13px] font-semibold text-slate-800 dark:text-slate-100 truncate">Matematika</p>
+                        <p class="text-[12px] text-slate-400 mt-0.5">Kelas XI-A</p>
+                    </div>
+                    <span class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 shrink-0">Menunggu</span>
+                </div>
+
+                {{-- Schedule Item 3 --}}
+                <div class="flex items-center gap-5 px-6 py-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition">
+                    <div class="text-center w-14 shrink-0">
+                        <p class="text-[13px] font-bold text-slate-900 dark:text-white">13:00</p>
+                        <p class="text-[11px] text-slate-400">14:30</p>
+                    </div>
+                    <div class="h-10 w-1 rounded-full bg-cyan-400"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[13px] font-semibold text-slate-800 dark:text-slate-100 truncate">Bahasa Inggris</p>
+                        <p class="text-[12px] text-slate-400 mt-0.5">Kelas XI-A</p>
+                    </div>
+                    <span class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 shrink-0">Belum</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Distribusi Kehadiran (2 col span) --}}
+        <div class="xl:col-span-2 bg-white dark:bg-[#0F1524] border border-slate-200/70 dark:border-slate-800/50 rounded-2xl">
+            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800/50">
+                <h2 class="text-[15px] font-bold text-slate-900 dark:text-white">Distribusi Kehadiran</h2>
+                <p class="text-[12px] text-slate-400 mt-0.5">Semester ini</p>
             </div>
 
-            <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Presensi Semester</p>
-            <h3 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">95%</h3>
-            <p class="mt-3 text-sm font-medium text-slate-400">Status kehadiran baik</p>
-        </div>
-
-        <div class="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524]">
-            <div class="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-500 dark:bg-violet-500/10 dark:text-violet-300">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15.5A2.5 2.5 0 0 1 16.5 21H7.5A2.5 2.5 0 0 1 5 18.5v-13Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 7h8M8 11h8M8 15h5" />
-                </svg>
-            </div>
-
-            <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Mata Pelajaran</p>
-            <h3 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">12</h3>
-            <p class="mt-3 text-sm font-medium text-slate-400">Aktif semester ini</p>
-        </div>
-
-        <div class="rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524]">
-            <div class="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-300">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3.75 7.75A2.75 2.75 0 0 1 6.5 5h11A2.75 2.75 0 0 1 20.25 7.75v8.5A2.75 2.75 0 0 1 17.5 19h-11a2.75 2.75 0 0 1-2.75-2.75v-8.5Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 10h16M8 15h1.5M12 15h2.5" />
-                </svg>
-            </div>
-
-            <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">Status Administrasi</p>
-            <h3 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">Lengkap</h3>
-            <p class="mt-3 text-sm font-medium text-slate-400">SPP dan tagihan terbaru</p>
-        </div>
-    </section>
-
-    <section class="rounded-[28px] border border-slate-100 bg-white p-6 shadow-[0_14px_45px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#0F1524] md:p-8">
-        <div class="flex flex-col gap-3 border-b border-slate-100 pb-6 dark:border-slate-800 md:flex-row md:items-center md:justify-between">
-            <div>
-                <h2 class="text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-                    Jadwal Mapel Hari Ini
-                </h2>
-                <p class="mt-1 text-sm font-medium text-slate-400">
-                    {{ now()->translatedFormat('l, d F Y') }}
-                </p>
-            </div>
-
-            <a
-                href="{{ route('attendance.index') }}"
-                class="inline-flex items-center justify-center rounded-2xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-600 transition hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
-            >
-                Lihat Semua Jadwal
-            </a>
-        </div>
-
-        <div class="mt-6 rounded-[24px] border border-slate-100 bg-slate-50 p-5 dark:border-slate-800 dark:bg-[#121929]">
-            <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                <div class="flex gap-4">
-                    <div class="min-w-[64px] rounded-2xl bg-white px-3 py-3 text-center shadow-sm dark:bg-[#0F1524]">
-                        <p class="text-sm font-extrabold text-slate-950 dark:text-white">08:00</p>
-                        <p class="mt-1 text-xs font-semibold text-slate-400">10:30</p>
+            <div class="p-6">
+                {{-- Simple bar-style stats --}}
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-[12px] mb-1.5">
+                            <span class="font-medium text-slate-600 dark:text-slate-300">Hadir</span>
+                            <span class="font-bold text-slate-900 dark:text-white">85%</span>
+                        </div>
+                        <div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500 rounded-full" style="width: 85%"></div>
+                        </div>
                     </div>
 
                     <div>
-                        <p class="text-base font-extrabold text-slate-950 dark:text-white">
-                            Teknologi Informasi & Komunikasi
-                        </p>
+                        <div class="flex justify-between text-[12px] mb-1.5">
+                            <span class="font-medium text-slate-600 dark:text-slate-300">Izin</span>
+                            <span class="font-bold text-slate-900 dark:text-white">8%</span>
+                        </div>
+                        <div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500 rounded-full" style="width: 8%"></div>
+                        </div>
+                    </div>
 
-                        <p class="mt-2 flex items-center gap-2 text-sm font-medium text-slate-400">
-                            <svg class="h-4 w-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 21s7-4.7 7-11a7 7 0 1 0-14 0c0 6.3 7 11 7 11Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 12.5A2.5 2.5 0 1 0 12 7a2.5 2.5 0 0 0 0 5.5Z" />
-                            </svg>
-                            Ruang Lab Komputer B
-                        </p>
+                    <div>
+                        <div class="flex justify-between text-[12px] mb-1.5">
+                            <span class="font-medium text-slate-600 dark:text-slate-300">Sakit</span>
+                            <span class="font-bold text-slate-900 dark:text-white">5%</span>
+                        </div>
+                        <div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-amber-500 rounded-full" style="width: 5%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[12px] mb-1.5">
+                            <span class="font-medium text-slate-600 dark:text-slate-300">Alpa</span>
+                            <span class="font-bold text-slate-900 dark:text-white">2%</span>
+                        </div>
+                        <div class="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-red-500 rounded-full" style="width: 2%"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="md:text-right">
-                    <span class="inline-flex rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-extrabold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
-                        Hadir
-                    </span>
-
-                    <p class="mt-2 text-xs font-semibold text-slate-400">
-                        Diverifikasi oleh guru
-                    </p>
+                {{-- Summary --}}
+                <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800/50 grid grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <p class="text-2xl font-extrabold text-slate-900 dark:text-white">120</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Total Hari</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">102</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Hari Hadir</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+
 </x-layouts.app-percikais>
