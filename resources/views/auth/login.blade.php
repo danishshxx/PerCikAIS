@@ -167,7 +167,7 @@
 
             try {
                 // Generate QR Token dari Backend Rust
-                const res = await fetch('https://percikapi.hbii.my.id/api/auth/qr/generate', { method: 'POST' });
+                const res = await fetch('https://api-percik.hbii.my.id/api/auth/qr/generate', { method: 'POST' });
                 if (!res.ok) throw new Error('Gagal terhubung ke server');
                 const data = await res.json();
                 const token = data.qr_token;
@@ -183,7 +183,7 @@
                 if (qrPollInterval) clearInterval(qrPollInterval);
                 qrPollInterval = setInterval(async () => {
                     try {
-                        const statusRes = await fetch(`https://percikapi.hbii.my.id/api/auth/qr/status?token=${token}`);
+                        const statusRes = await fetch(`https://api-percik.hbii.my.id/api/auth/qr/status?token=${token}`);
                         if (!statusRes.ok) return;
                         const statusData = await statusRes.json();
 
