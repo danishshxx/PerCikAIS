@@ -1,3 +1,5 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
 @php
     $user = auth()->user();
 
@@ -150,7 +152,7 @@
                 </p>
 
                 <div x-data="{
-                    qrCodeUrl: null,
+                    qrPayload: null,
                     qrLoading: false,
                     qrError: null,
                     async generateQr() {
@@ -161,7 +163,15 @@
                             if (!res.ok) throw new Error('Gagal memuat sesi QR');
                             const data = await res.json();
                             if (data.success && data.payload) {
-                                this.qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.payload)}`;
+                                this.qrPayload = data.payload;
+                                this.$nextTick(() => {
+                                    new QRious({
+                                        element: document.getElementById('qr-canvas'),
+                                        value: data.payload,
+                                        size: 200,
+                                        level: 'M'
+                                    });
+                                });
                             } else {
                                 throw new Error('Format respon tidak valid');
                             }
@@ -173,17 +183,17 @@
                     }
                 }" class="mt-5 flex flex-col items-center">
                     
-                    <template x-if="qrCodeUrl">
+                    <template x-if="qrPayload">
                         <div class="flex flex-col items-center gap-3 w-full">
                             <div class="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white flex items-center justify-center">
-                                <img :src="qrCodeUrl" alt="Login QR Code" class="w-40 h-40 rounded-xl shadow-sm" />
+                                <canvas id="qr-canvas" class="w-40 h-40 rounded-xl shadow-sm"></canvas>
                             </div>
                             <p class="text-[10px] text-slate-400 text-center font-bold leading-relaxed">
                                 QR Code berlaku selama 30 hari. Rahasiakan QR Code ini.
                             </p>
                             <button
                                 type="button"
-                                x-on:click="qrCodeUrl = null"
+                                x-on:click="qrPayload = null"
                                 class="px-3 py-1.5 text-[10px] font-bold text-slate-500 hover:text-slate-850 dark:hover:text-slate-200 transition"
                             >
                                 Sembunyikan QR Code
@@ -191,7 +201,7 @@
                         </div>
                     </template>
 
-                    <template x-if="!qrCodeUrl">
+                    <template x-if="!qrPayload">
                         <button
                             type="button"
                             x-on:click="generateQr()"
