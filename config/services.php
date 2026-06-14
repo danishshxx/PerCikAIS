@@ -47,6 +47,7 @@ return [
 
     'rust_backend' => [
         'url' => env('RUST_BACKEND_URL', 'http://127.0.0.1:8080'),
+        'public_url' => env('RUST_BACKEND_PUBLIC_URL', 'https://api-percik.hbii.my.id'),
         'timeout' => env('RUST_BACKEND_TIMEOUT', 5),
         'jwt_secret' => env('JWT_SECRET', 'percik-super-secret-jwt-key-2026-change-in-production'),
     ],

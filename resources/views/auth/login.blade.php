@@ -167,7 +167,7 @@
 
             try {
                 // Generate QR Token dari Backend Rust
-                const backendUrl = @json(rtrim(config('services.rust_backend.url'), '/'));
+                const backendUrl = @json(rtrim(config('services.rust_backend.public_url'), '/'));
                 const res = await fetch(`${backendUrl}/api/auth/qr/generate`, { method: 'POST' });
                 if (!res.ok) throw new Error('Gagal terhubung ke server');
                 const data = await res.json();
