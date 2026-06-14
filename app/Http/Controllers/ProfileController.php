@@ -92,18 +92,44 @@ class ProfileController extends Controller
     public function mobileQrPayload(Request $request): \Illuminate\Http\JsonResponse
     {
         $user = $request->user();
-        $secret = config('services.rust_backend.jwt_secret', 'percik-super-secret-jwt-key-2026-change-in-production');
+        $token = null;
 
-        // Generate token payload matching backend structure
-        $tokenPayload = [
-            'sub' => $user->email,
-            'user_id' => $user->id,
-            'role' => strtoupper($user->role),
-            'iat' => time(),
-            'exp' => time() + (30 * 24 * 60 * 60) // 30 days
-        ];
+        // Try getting token from Rust backend if session has rust_token
+        $rustToken = session('rust_token');
+        if ($rustToken) {
+            try {
+                $backendUrl = rtrim(config('services.rust_backend.url'), '/');
+                $response = \Illuminate\Support\Facades\Http::withToken($rustToken)
+                    ->timeout(5)
+                    ->acceptJson()
+                    ->post($backendUrl . '/api/auth/mobile-token');
 
-        $token = $this->signJwt($tokenPayload, $secret);
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if (data_get($data, 'success') && data_get($data, 'token')) {
+                        $token = data_get($data, 'token');
+                    }
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to fetch mobile-token from Rust backend', ['message' => $e->getMessage()]);
+            }
+        }
+
+        // Fallback to local signing if backend call failed or was not available
+        if (!$token) {
+            $secret = config('services.rust_backend.jwt_secret', 'percik-super-secret-jwt-key-2026-change-in-production');
+
+            // Generate token payload matching backend structure
+            $tokenPayload = [
+                'sub' => $user->email,
+                'user_id' => $user->id,
+                'role' => strtoupper($user->role),
+                'iat' => time(),
+                'exp' => time() + (30 * 24 * 60 * 60) // 30 days
+            ];
+
+            $token = $this->signJwt($tokenPayload, $secret);
+        }
 
         $userData = [
             'id' => $user->id,
