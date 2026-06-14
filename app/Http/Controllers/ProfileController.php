@@ -88,4 +88,61 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function mobileQrPayload(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = $request->user();
+        $secret = config('services.rust_backend.jwt_secret', 'percik-super-secret-jwt-key-2026-change-in-production');
+
+        // Generate token payload matching backend structure
+        $tokenPayload = [
+            'sub' => $user->email,
+            'user_id' => $user->id,
+            'role' => strtoupper($user->role),
+            'iat' => time(),
+            'exp' => time() + (30 * 24 * 60 * 60) // 30 days
+        ];
+
+        $token = $this->signJwt($tokenPayload, $secret);
+
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'role' => strtoupper($user->role),
+            'nim' => $user->nim ?? null,
+            'nisn' => $user->nis ?? null,
+            'kelas' => $user->kelas ?? null
+        ];
+
+        $qrPayload = json_encode([
+            'type' => 'login',
+            'token' => $token,
+            'user' => $userData
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'payload' => $qrPayload
+        ]);
+    }
+
+    private function signJwt(array $payload, string $secret): string
+    {
+        $header = ['alg' => 'HS256', 'typ' => 'JWT'];
+        
+        $base64UrlHeader = $this->base64UrlEncode(json_encode($header));
+        $base64UrlPayload = $this->base64UrlEncode(json_encode($payload));
+        
+        $stringToSign = "$base64UrlHeader.$base64UrlPayload";
+        $signature = hash_hmac('sha256', $stringToSign, $secret, true);
+        $base64UrlSignature = $this->base64UrlEncode($signature);
+        
+        return "$stringToSign.$base64UrlSignature";
+    }
+
+    private function base64UrlEncode(string $input): string
+    {
+        return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($input));
+    }
 }
