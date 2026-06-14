@@ -78,12 +78,12 @@ class GoogleAuthController extends Controller
                 ], 400);
             }
 
-            $payload = $this->decodeJwtPayload($qrJwt);
+            $payload = $this->verifyAndDecodeJwt($qrJwt);
 
             if (! $payload || ! isset($payload->sub)) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Invalid token payload',
+                    'error' => 'Invalid or unverified token payload',
                 ], 400);
             }
 
@@ -91,7 +91,7 @@ class GoogleAuthController extends Controller
 
             $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
-            // Auto-sync dari tabel LMS `user` jika belum ada di tabel Laravel `users`
+            // Auto-sync dari tabel LMS `User` jika belum ada di tabel Laravel `users`
             if (! $user) {
                 $user = $this->syncFromLmsUser($email, $payload->name ?? null);
             }
@@ -180,20 +180,35 @@ class GoogleAuthController extends Controller
         return null;
     }
 
-    private function decodeJwtPayload(string $jwt): ?object
+    private function verifyAndDecodeJwt(string $jwt): ?object
     {
         $parts = explode('.', $jwt);
 
-        if (count($parts) < 2) {
+        if (count($parts) !== 3) {
             return null;
         }
 
+        $header = $parts[0];
         $payload = $parts[1];
+        $signature = $parts[2];
 
-        $payload = str_replace(['-', '_'], ['+', '/'], $payload);
-        $payload .= str_repeat('=', (4 - strlen($payload) % 4) % 4);
+        // Recompute and verify signature using HMAC SHA256
+        $secret = config('services.rust_backend.jwt_secret', 'percik-super-secret-jwt-key-2026-change-in-production');
+        $stringToSign = "$header.$payload";
+        $computedSignature = hash_hmac('sha256', $stringToSign, $secret, true);
+        
+        $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($computedSignature));
 
-        $decoded = base64_decode($payload, true);
+        if (!hash_equals($base64UrlSignature, $signature)) {
+            Log::warning('JWT signature verification failed.');
+            return null;
+        }
+
+        // Decode payload
+        $payloadDecoded = str_replace(['-', '_'], ['+', '/'], $payload);
+        $payloadDecoded .= str_repeat('=', (4 - strlen($payloadDecoded) % 4) % 4);
+
+        $decoded = base64_decode($payloadDecoded, true);
 
         if ($decoded === false) {
             return null;
@@ -201,16 +216,26 @@ class GoogleAuthController extends Controller
 
         $json = json_decode($decoded);
 
-        return is_object($json) ? $json : null;
+        if (!is_object($json)) {
+            return null;
+        }
+
+        // Verify expiration if present
+        if (isset($json->exp) && $json->exp < time()) {
+            Log::warning('JWT token has expired.', ['exp' => $json->exp]);
+            return null;
+        }
+
+        return $json;
     }
 
     /**
-     * Cek apakah email ada di tabel LMS `user`, lalu auto-create di tabel Laravel `users`.
+     * Cek apakah email ada di tabel LMS `User`, lalu auto-create di tabel Laravel `users`.
      */
     private function syncFromLmsUser(string $email, ?string $fallbackName = null): ?User
     {
         try {
-            $lmsUser = DB::table('user')
+            $lmsUser = DB::table('User')
                 ->whereRaw('LOWER(email) = ?', [$email])
                 ->first();
 
@@ -227,8 +252,6 @@ class GoogleAuthController extends Controller
                 'password' => bcrypt(\Illuminate\Support\Str::random(32)),
                 'role' => $role,
             ]);
-
-
 
             Log::info('Auto-synced user from LMS table', [
                 'email' => $email,
