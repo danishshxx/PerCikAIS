@@ -1,5 +1,15 @@
-<x-layouts.app-percikais>
-    <x-slot name="title">Pengaturan Akun</x-slot>
+@php
+    $user = auth()->user();
+    $settingsLayout = 'layouts.app-percikais';
+    if (method_exists($user, 'isAdmin') && $user->isAdmin()) {
+        $settingsLayout = 'layouts.admin-percikais';
+    } elseif (method_exists($user, 'isTeacher') && $user->isTeacher()) {
+        $settingsLayout = 'layouts.teacher-percikais';
+    }
+@endphp
+
+<x-dynamic-component :component="$settingsLayout">
+    <x-slot name="title">@if ($user->isTeacher()) Pengaturan Guru @else Pengaturan Akun @endif</x-slot>
 
     <style>
         :root {
@@ -188,10 +198,10 @@
 
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">
-                        Pengaturan Akun
+                        @if ($user->isTeacher()) Pengaturan Guru @else Pengaturan Akun @endif
                     </h1>
                     <p class="mt-1 text-sm font-medium text-slate-400">
-                        Kelola preferensi tampilan dan notifikasi akun siswa.
+                        Kelola preferensi tampilan dan notifikasi akun @if ($user->isTeacher()) guru @else siswa @endif.
                     </p>
                 </div>
             </div>
@@ -411,6 +421,7 @@
                             </button>
                         </div>
 
+                        @if(auth()->user()->isStudent())
                         <div class="flex items-center justify-between gap-5 rounded-3xl border border-slate-100 bg-slate-50 p-5 dark:border-slate-800 dark:bg-[#121929]">
                             <div>
                                 <h3 class="text-sm font-extrabold text-slate-800 dark:text-white">Administrasi SPP</h3>
@@ -430,6 +441,7 @@
                                 ></span>
                             </button>
                         </div>
+                        @endif
 
                         <div class="flex items-center justify-between gap-5 rounded-3xl border border-slate-100 bg-slate-50 p-5 dark:border-slate-800 dark:bg-[#121929]">
                             <div>
@@ -475,4 +487,4 @@
             </div>
         </div>
     </section>
-</x-layouts.app-percikais>
+</x-dynamic-component>

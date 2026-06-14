@@ -109,7 +109,7 @@ Route::middleware(['auth', 'verified', 'teacher'])
     ->group(function () {
         Route::get('/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
 
-        Route::view('/settings', 'teacher.settings.index')->name('settings');
+        Route::view('/settings', 'student.settings.index')->name('settings');
 
         Route::get('/attendance', [TeacherController::class, 'attendance'])->name('attendance');
         Route::post('/attendance/store', [TeacherController::class, 'storeAttendance'])->name('attendance.store');

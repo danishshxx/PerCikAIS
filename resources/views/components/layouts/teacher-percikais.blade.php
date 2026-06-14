@@ -206,6 +206,10 @@
                                 <p class="text-[11px] text-slate-400 truncate mt-0.5">{{ $userEmail }}</p>
                             </div>
                             <div class="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
+                            <a href="{{ route('teacher.settings') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg>
+                                Pengaturan
+                            </a>
                             <form method="POST" action="{{ route('logout') }}">@csrf
                                 <button type="submit" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0-4-4m4 4H8M13 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7" /></svg>
